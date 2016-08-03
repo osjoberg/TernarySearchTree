@@ -6,6 +6,7 @@ namespace TernarySearchTree
     /// <summary>
     /// WildcardDictionary, implements a dictionary with a key of type String. 
     /// The Key to search for may contain wildcards. Implemented as a ternary search tree.
+    /// 
     /// Based on: 
     /// http://www.codeproject.com/KB/recipes/tst.aspx
     /// http://www.cs.otago.ac.nz/cosc463/2005/ternary.c

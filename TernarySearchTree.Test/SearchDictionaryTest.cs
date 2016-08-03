@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TernarySearchTree.Test
 {
-    using System.Linq;
-
     [TestClass]
     public class SearchDictionaryTest
     {
