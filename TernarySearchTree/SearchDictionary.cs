@@ -84,7 +84,7 @@ namespace TernarySearchTree
         public bool TryGetValue(string key, out TValue value)
         {
             var node = FindNodeByKey(root, key);
-            if (node == null)
+            if (node == null || node.HasValue == false)
             {
                 value = default(TValue);
                 return false;
@@ -117,8 +117,11 @@ namespace TernarySearchTree
                 yield break;
             }
 
-            yield return node.Value;
-
+            if (node.HasValue)
+            {
+                yield return node.Value;
+            }
+            
             foreach (var value in GetAllValues(node.EqualNode))
             {
                 yield return value;
