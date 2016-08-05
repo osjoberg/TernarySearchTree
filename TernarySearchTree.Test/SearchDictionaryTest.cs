@@ -12,7 +12,7 @@ namespace TernarySearchTree.Test
         [ExpectedException(typeof(ArgumentException))]
         public void Add()
         {
-            SearchDictionary<string> dictionary = new SearchDictionary<string>();
+            var dictionary = new SearchDictionary<string>();
             const string Key = "Test";
 
             dictionary.Add(Key, "Data");
@@ -32,7 +32,7 @@ namespace TernarySearchTree.Test
                 { "b", "b" }
             };
 
-            CollectionAssert.AreEqual(new[] { "a", "aa", "b", "c"}, dictionary.Values.OrderBy(value => value).ToArray());
+            CollectionAssert.AreEqual(new[] { "a", "aa", "b", "c" }, dictionary.Values.OrderBy(value => value).ToArray());
         }
 
         [TestMethod]
@@ -87,18 +87,23 @@ namespace TernarySearchTree.Test
         }
 
         [TestMethod]
-        public void Clear()
+        [ExpectedException(typeof(KeyNotFoundException))]
+        public void GetThis()
         {
-            SearchDictionary<string> dictionary = new SearchDictionary<string>();
+            SearchDictionary<object> dictionary = new SearchDictionary<object>();
             const string Key = "Test";
+            object object1 = new object();
+            object object2 = new object();
 
-            dictionary.Add(Key, "data");
-            dictionary.Clear();
-            dictionary.Add(Key, "data");
-            dictionary.Clear();
+            dictionary.Add(Key + 1, object1);
+            dictionary.Add(Key + 2, object2);
 
-            // Test that the dictionary count is 0.
-            Assert.AreEqual(0, dictionary.Count);
+            // Test that key1 maps to object1 and key2 maps to object2.
+            Assert.AreEqual(object1, dictionary[Key + 1]);
+            Assert.AreEqual(object2, dictionary[Key + 2]);
+
+            // Test that KeyNotFoundException is thrown.
+            var obj = dictionary[Key + 3];
         }
 
         [TestMethod]
@@ -121,23 +126,17 @@ namespace TernarySearchTree.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(KeyNotFoundException))]
-        public void GetThis()
+        public void StartsWith()
         {
-            SearchDictionary<object> dictionary = new SearchDictionary<object>();
-            const string Key = "Test";
-            object object1 = new object();
-            object object2 = new object();
+            var dictionary = new SearchDictionary<string>
+            {
+                { "testa", "testa" },
+                { "testb", "testb" },
+                { "test", "test" },
+                { "tesk", "tesk" }
+            };
 
-            dictionary.Add(Key + 1, object1);
-            dictionary.Add(Key + 2, object2);
-
-            // Test that key1 maps to object1 and key2 maps to object2.
-            Assert.AreEqual(object1, dictionary[Key + 1]);
-            Assert.AreEqual(object2, dictionary[Key + 2]);
-
-            // Test that KeyNotFoundException is thrown.
-            object obj = dictionary[Key + 3];
+            CollectionAssert.AreEqual(new[] { "testa", "testb", "test" }.OrderBy(v => v).ToArray(), dictionary.StartsWith("test").OrderBy(v => v).ToArray());
         }
 
         [TestMethod]
@@ -166,16 +165,63 @@ namespace TernarySearchTree.Test
         }
 
         [TestMethod]
-        public void StartsWith()
+        public void RemoveRemovesAllKeysProperly()
         {
-            var dictionary = new SearchDictionary<string>();
+            var dictionary = new SearchDictionary<string>
+            {
+                { "a", "a" },
+                { "aa", "aa" },
+                { "c", "c" },
+                { "b", "b" }
+            };
 
-            dictionary.Add("testa", "testa");
-            dictionary.Add("testb", "testb");
-            dictionary.Add("test", "test");
-            dictionary.Add("tesk", "tesk");
+            dictionary.Remove("a");
+            dictionary.Remove("b");
+            dictionary.Remove("c");
+            dictionary.Remove("aa");
 
-            CollectionAssert.AreEqual(new[] { "testa", "testb", "test" }.OrderBy(v => v).ToArray(), dictionary.StartsWith("test").OrderBy(v => v).ToArray());
+            Assert.AreEqual(0, dictionary.Count);
+            Assert.IsFalse(dictionary.ContainsKey("a"));
+            Assert.IsFalse(dictionary.ContainsKey("b"));
+            Assert.IsFalse(dictionary.ContainsKey("c"));
+            Assert.IsFalse(dictionary.ContainsKey("aa"));
+        }
+
+        [TestMethod]
+        public void RemoveRemovesKeysProperly()
+        {
+            var dictionary = new SearchDictionary<string>
+            {
+                { "a", "a" },
+                { "aa", "aa" },
+                { "c", "c" },
+                { "b", "b" }
+            };
+
+            dictionary.Remove("a");
+            dictionary.Remove("b");
+            dictionary.Remove("c");
+
+            Assert.AreEqual(1, dictionary.Count);
+            Assert.IsFalse(dictionary.ContainsKey("a"));
+            Assert.IsFalse(dictionary.ContainsKey("b"));
+            Assert.IsFalse(dictionary.ContainsKey("c"));
+            Assert.IsTrue(dictionary.ContainsKey("aa"));
+        }
+
+        [TestMethod]
+        public void Clear()
+        {
+            SearchDictionary<string> dictionary = new SearchDictionary<string>();
+            const string Key = "Test";
+
+            dictionary.Add(Key, "data");
+            dictionary.Clear();
+            dictionary.Add(Key, "data");
+            dictionary.Clear();
+
+            // Test that the dictionary count is 0.
+            Assert.AreEqual(0, dictionary.Count);
         }
     }
 }

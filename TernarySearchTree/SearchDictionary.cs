@@ -45,7 +45,7 @@ namespace TernarySearchTree
                 Argument.IsNotNullAndNotEmpty(key, nameof(key));
 
                 // Find node.
-                var node = Traverse.GetNode(root, key);
+                var node = Tree.GetNode(root, key);
 
                 // If no node was found, throw exception.
                 if (node == null)
@@ -61,20 +61,25 @@ namespace TernarySearchTree
             {
                 Argument.IsNotNullAndNotEmpty(key, nameof(key));
 
-                // Call insert.
-                Insert(key, value, false);
+                var leafNode = Tree.CreateNodes(ref root, key);
+                if (leafNode.HasValue == false)
+                {
+                    Count++;
+                }
+
+                leafNode.Value = value;
             }
         }
 
         /// <summary>
         /// Returns all keys in the dictionary.
         /// </summary>
-        public ICollection<string> Keys => new Collection<string>(Traverse.GetAllKeys(root, "").ToArray());
+        public ICollection<string> Keys => new Collection<string>(Tree.GetAllKeys(root, "").ToArray());
 
         /// <summary>
         /// Returns all values in the dictionary.
         /// </summary>
-        public ICollection<TValue> Values => new Collection<TValue>(Traverse.GetAllValues(root).ToArray());
+        public ICollection<TValue> Values => new Collection<TValue>(Tree.GetAllValues(root).ToArray());
 
         /// <summary>
         /// Add an item to the dictionary.
@@ -85,7 +90,14 @@ namespace TernarySearchTree
         {
             Argument.IsNotNullAndNotEmpty(key, nameof(key));
 
-            Insert(key, value, true);
+            var leafNode = Tree.CreateNodes(ref root, key);
+            if (leafNode.HasValue)
+            {
+                throw new ArgumentException("An item with the same key has already been added to the dictionary.", nameof(key));
+            }
+
+            Count++;
+            leafNode.Value = value;
         }
 
         /// <summary>
@@ -106,7 +118,7 @@ namespace TernarySearchTree
         /// <returns>Enumerator.</returns>
         public IEnumerator<KeyValuePair<string, TValue>> GetEnumerator()
         {
-            return Traverse.GetAllKeyValuePairs(root, "").GetEnumerator();
+            return Tree.GetAllKeyValuePairs(root, "").GetEnumerator();
         }
 
         /// <summary>
@@ -118,7 +130,7 @@ namespace TernarySearchTree
         {
             Argument.IsNotNullAndNotEmpty(key, nameof(key));
 
-            var treeWildcardDictionaryNode = Traverse.GetNode(root, key);
+            var treeWildcardDictionaryNode = Tree.GetNode(root, key);
             return treeWildcardDictionaryNode != null && treeWildcardDictionaryNode.HasValue;
         }
 
@@ -132,7 +144,7 @@ namespace TernarySearchTree
             Argument.IsNotNull(item, nameof(item));
             Argument.IsNotNullAndNotEmpty(item.Key, nameof(item));
 
-            var node = Traverse.GetNode(root, item.Key);
+            var node = Tree.GetNode(root, item.Key);
 
             return node != null && node.HasValue && EqualityComparer<TValue>.Default.Equals(node.Value, item.Value);
         }
@@ -147,7 +159,7 @@ namespace TernarySearchTree
         {
             Argument.IsNotNullAndNotEmpty(key, nameof(key));
 
-            var node = Traverse.GetNode(root, key);
+            var node = Tree.GetNode(root, key);
             if (node == null || node.HasValue == false)
             {
                 value = default(TValue);
@@ -167,7 +179,7 @@ namespace TernarySearchTree
         {
             Argument.IsNotNullAndNotEmpty(startOfKey, nameof(startOfKey));
 
-            var node = Traverse.GetNode(root, startOfKey);
+            var node = Tree.GetNode(root, startOfKey);
 
             if (node == null)
             {
@@ -179,7 +191,7 @@ namespace TernarySearchTree
                 yield return node.Value;
             }
             
-            foreach (var value in Traverse.GetAllValues(node.EqualNode))
+            foreach (var value in Tree.GetAllValues(node.EqualNode))
             {
                 yield return value;
             }
@@ -195,10 +207,59 @@ namespace TernarySearchTree
             Argument.IsNotNull(array, nameof(array));
             Argument.IsWithinRange(index >= 0 && array.Length - index >= Count, nameof(index));
 
-            foreach (var pair in Traverse.GetAllKeyValuePairs(root, ""))
+            foreach (var pair in Tree.GetAllKeyValuePairs(root, ""))
             {
                 array[index++] = pair;
             }
+        }
+
+        /// <summary>
+        /// Remove a key from the dictionary.
+        /// </summary>
+        /// <param name="key">Key to get.</param>
+        /// <returns></returns>
+        public bool Remove(string key)
+        {
+            Argument.IsNotNullAndNotEmpty(key, nameof(key));
+
+            var node = Tree.GetNode(root, key);
+            if (node == null || node.HasValue == false)
+            {
+                return false;
+            }
+
+            RemoveInternal(key);
+            return true;
+        }
+
+        /// <summary>
+        /// Remove a key from the dictionary.
+        /// </summary>
+        /// <param name="item">Item to remove.</param>
+        public bool Remove(KeyValuePair<string, TValue> item)
+        {
+            Argument.IsNotNull(item, nameof(item));
+            Argument.IsNotNullAndNotEmpty(item.Key, nameof(item));
+
+            var node = Tree.GetNode(root, item.Key);
+            if (node == null || node.HasValue == false || EqualityComparer<TValue>.Default.Equals(node.Value, item.Value) == false)
+            {
+                return false;
+            }
+
+            RemoveInternal(item.Key);
+            return true;
+        }
+
+        private void RemoveInternal(string key)
+        {
+            Tree.RemoveNode(root, key, 0);
+            if (root.CanBeRemoved)
+            {
+                root = null;
+            }
+
+            Count--;
         }
 
         /// <summary>
@@ -208,104 +269,6 @@ namespace TernarySearchTree
         {
             root = null;
             Count = 0;
-        }
-
-        /// <summary>
-        /// Remove a key from the dictionary (Not implemented).
-        /// </summary>
-        /// <param name="key">Key to get.</param>
-        /// <returns></returns>
-        public bool Remove(string key)
-        {
-            throw new NotImplementedException("Remove is not yet implemented.");
-        }
-
-        /// <summary>
-        /// Remove a key from the dictionary (Not implemented).
-        /// </summary>
-        /// <param name="item">Item to remove.</param>
-        public bool Remove(KeyValuePair<string, TValue> item)
-        {
-            throw new NotImplementedException("Remove is not yet implemented.");
-        }
-
-        private void Insert(string key, TValue value, bool checkIfKeyExists)
-        {
-            // Setup current key index and character.
-            var currentKeyCharacterIndex = 0;
-            var currentKeyCharacter = key[currentKeyCharacterIndex];
-
-            // Create a root node if it does not exist.
-            if (root == null)
-            {
-                root = new Node<TValue>(currentKeyCharacter);
-            }
-
-            // Get current node.
-            var node = root;
-
-            // Loop until we have added the key and value.
-            for (;;)
-            {
-                if (currentKeyCharacter < node.SplitCharacter)
-                {
-                    // If no lower node exists, create a new lower node.
-                    if (node.LowerNode == null)
-                    {
-                        node.LowerNode = new Node<TValue>(currentKeyCharacter);
-                    }
-
-                    // Set current node to lower node.
-                    node = node.LowerNode;
-                }                
-                else if (currentKeyCharacter > node.SplitCharacter)
-                {
-                    // If no higher node exists, create a new higher node.
-                    if (node.HigherNode == null)
-                    {
-                        node.HigherNode = new Node<TValue>(currentKeyCharacter);
-                    }
-
-                    // Set current node to higher node.
-                    node = node.HigherNode;
-                }
-                else
-                {
-                    // If we havent processed all split characters.
-                    if (++currentKeyCharacterIndex < key.Length)
-                    {
-                        // Advance to next split character.
-                        currentKeyCharacter = key[currentKeyCharacterIndex];
-
-                        // Create new equal node if it does not exist.
-                        if (node.EqualNode == null)
-                        {
-                            node.EqualNode = new Node<TValue>(currentKeyCharacter);
-                        }
-
-                        // Set current node to equal node.
-                        node = node.EqualNode;
-                    }
-                    else
-                    {
-                        // Make sure current node does not already have a value.
-                        if (checkIfKeyExists && node.HasValue)
-                        {
-                            throw new ArgumentException("An item with the same key has already been added to the dictionary.", nameof(key));
-                        }
-
-                        // Increase count.
-                        if (node.HasValue == false)
-                        {
-                            Count++;
-                        }
-
-                        // Set the value of the current node.
-                        node.Value = value;
-                        return;
-                    }
-                }
-            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -32,5 +32,13 @@
                 HasValue = true;
             }
         }
+
+        internal void ClearValue()
+        {
+            value = default(TValue);
+            HasValue = false;
+        }
+
+        public bool CanBeRemoved => HigherNode == null && LowerNode == null && EqualNode == null && HasValue == false;
     }
 }
