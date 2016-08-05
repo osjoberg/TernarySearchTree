@@ -1,7 +1,7 @@
-﻿namespace TernarySearchTree
-{
-    using System;
+﻿using System;
 
+namespace TernarySearchTree
+{
     internal static class Argument
     {
         internal static void IsNotNullAndNotEmpty(string argument, string argumentName)
