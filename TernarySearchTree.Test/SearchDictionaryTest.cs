@@ -22,6 +22,54 @@ namespace TernarySearchTree.Test
         }
 
         [TestMethod]
+        public void ValuesPropertyReturnsAllValues()
+        {
+            var dictionary = new SearchDictionary<string>
+            {
+                { "a", "a" },
+                { "aa", "aa" },
+                { "c", "c" },
+                { "b", "b" }
+            };
+
+            CollectionAssert.AreEqual(new[] { "a", "aa", "b", "c"}, dictionary.Values.OrderBy(value => value).ToArray());
+        }
+
+        [TestMethod]
+        public void KeysPropertyReturnsAllKeys()
+        {
+            var dictionary = new SearchDictionary<string>
+            {
+                { "a", "a" },
+                { "aa", "aa" },
+                { "c", "c" },
+                { "b", "b" }
+            };
+
+            CollectionAssert.AreEqual(new[] { "a", "aa", "b", "c" }, dictionary.Keys.OrderBy(key => key).ToArray());
+        }
+
+        [TestMethod]
+        public void AllKeyValuePairsCanBeEnumerated()
+        {
+            var allItems = new List<KeyValuePair<string, string>>
+            {
+                { new KeyValuePair<string, string>("a", "a") },
+                { new KeyValuePair<string, string>("aa", "aa") },
+                { new KeyValuePair<string, string>("c", "c") },
+                { new KeyValuePair<string, string>("b", "b") },
+            };
+
+            var dictionary = new SearchDictionary<string>();
+            foreach (var item in allItems)
+            {
+                dictionary.Add(item);
+            }
+
+            CollectionAssert.AreEqual(allItems.OrderBy(item => item.Key).ToArray(), dictionary.OrderBy(item => item.Key).ToArray());
+        }
+
+        [TestMethod]
         public void ContainsKey()
         {
             SearchDictionary<string> dictionary = new SearchDictionary<string>();

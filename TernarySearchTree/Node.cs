@@ -9,7 +9,6 @@
             SplitCharacter = splitCharacter;
         }
 
-
         public char SplitCharacter { get; private set; }
 
         public Node<TValue> HigherNode { get; set; }
