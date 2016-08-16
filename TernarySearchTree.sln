@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TernarySearchTree", "Ternar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TernarySearchTree.Test", "TernarySearchTree.Test\TernarySearchTree.Test.csproj", "{50FD20F9-3CBD-4523-8F91-0323B3101E34}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TernarySearchTree.Benchmark", "TernarySearchTree.Benchmark\TernarySearchTree.Benchmark.csproj", "{38445790-D74D-4838-95DA-E4BED54228B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{50FD20F9-3CBD-4523-8F91-0323B3101E34}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50FD20F9-3CBD-4523-8F91-0323B3101E34}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50FD20F9-3CBD-4523-8F91-0323B3101E34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38445790-D74D-4838-95DA-E4BED54228B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38445790-D74D-4838-95DA-E4BED54228B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38445790-D74D-4838-95DA-E4BED54228B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38445790-D74D-4838-95DA-E4BED54228B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

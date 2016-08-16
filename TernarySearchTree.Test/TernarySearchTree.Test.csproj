@@ -50,6 +50,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="FuzzySearchDictionaryTest.cs" />
+    <Compile Include="Keygenerator.cs" />
     <Compile Include="SearchDictionaryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

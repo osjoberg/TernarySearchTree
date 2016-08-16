@@ -4,6 +4,60 @@ namespace TernarySearchTree
 {
     internal static class Tree
     {
+        internal static void GetSiblings<TValue>(Node<TValue> node, IList<Node<TValue>> siblings)
+        {
+            if (node == null)
+            {
+                return;
+            }
+
+            siblings.Add(node);
+
+            GetSiblings(node.LowerNode, siblings);
+            GetSiblings(node.HigherNode, siblings);
+        }
+
+        internal static IEnumerable<Node<TValue>> GetEqualNodes<TValue>(Node<TValue> node)
+        {
+            foreach (var n in GetAllNodes(node))
+            {
+                if (n.EqualNode != null)
+                {
+                    yield return node;
+                }
+            }
+        }
+
+        internal static Node<TValue> OptimizeEqualNode<TValue>(Node<TValue> equalNode)
+        {
+            var siblings = new List<Node<TValue>>();
+            GetSiblings(equalNode, siblings);
+            siblings.Sort(new SplitCharacterComparer<TValue>());
+
+            return OptimizeSiblings(siblings, 0, siblings.Count);
+        }
+
+        internal static Node<TValue> OptimizeSiblings<TValue>(IList<Node<TValue>> nodes, int index, int count)
+        {
+            if (count == 0)
+            {
+                return null;
+            }
+
+            if (count == 1)
+            {
+                var leafNode = nodes[index];
+                leafNode.LowerNode = null;
+                leafNode.HigherNode = null;
+                return leafNode;
+            }
+
+            var middleNode = nodes[index + count / 2];
+            middleNode.LowerNode = OptimizeSiblings<TValue>(nodes, index, count / 2);
+            middleNode.HigherNode = OptimizeSiblings<TValue>(nodes, index + count / 2 + 1, (count - 1) / 2);
+            return middleNode;
+        }
+
         internal static Node<TValue> GetNode<TValue>(Node<TValue> node, string key)
         {
             // Setup current key index and character.
@@ -160,6 +214,31 @@ namespace TernarySearchTree
             }
         }
 
+        internal static IEnumerable<Node<TValue>> GetAllNodes<TValue>(Node<TValue> node)
+        {
+            if (node == null)
+            {
+                yield break;
+            }
+
+            yield return node;
+
+            foreach (var lowerNode in GetAllNodes(node.LowerNode))
+            {
+                yield return lowerNode;
+            }
+
+            foreach (var equalNode in GetAllNodes(node.EqualNode))
+            {
+                yield return equalNode;
+            }
+
+            foreach (var higherNode in GetAllNodes(node.HigherNode))
+            {
+                yield return higherNode;
+            }
+        }
+
         internal static IEnumerable<KeyValuePair<string, TValue>> GetAllKeyValuePairs<TValue>(Node<TValue> node, string key)
         {
             if (node == null)
@@ -192,30 +271,45 @@ namespace TernarySearchTree
         {
             var currentKeyCharacter = key[keyIndex];
 
-            if (currentKeyCharacter < node.SplitCharacter && RemoveNode(node.LowerNode, key, keyIndex))
+            if (currentKeyCharacter < node.SplitCharacter)
             {
-                node.LowerNode = null;
-                return node.CanBeRemoved;
+                if (RemoveNode(node.LowerNode, key, keyIndex))
+                {
+                    node.LowerNode = null;
+                    return node.CanBeRemoved;
+                }
+
+                if (node.LowerNode.CanBeSimplified)
+                {
+                    node.LowerNode = node.LowerNode.LowerNode ?? node.LowerNode.HigherNode;
+                }
             }
 
-            if (currentKeyCharacter > node.SplitCharacter && RemoveNode(node.HigherNode, key, keyIndex))
+            if (currentKeyCharacter > node.SplitCharacter)
             {
-                node.HigherNode = null;
-                return node.CanBeRemoved;
+                if (RemoveNode(node.HigherNode, key, keyIndex))
+                {
+                    node.HigherNode = null;
+                    return node.CanBeRemoved;
+                }
+
+                if (node.HigherNode.CanBeSimplified)
+                {
+                    node.HigherNode = node.HigherNode.HigherNode ?? node.HigherNode.LowerNode;
+                }
             }
 
-            if (keyIndex < key.Length - 1 && RemoveNode(node.EqualNode, key, keyIndex + 1))
+            if (keyIndex < key.Length - 1 && currentKeyCharacter == node.SplitCharacter && RemoveNode(node.EqualNode, key, keyIndex + 1))
             {
                 node.EqualNode = null;
                 return node.CanBeRemoved;
             }
 
-            if (node.HasValue == false)
+            if (keyIndex == key.Length - 1 && currentKeyCharacter == node.SplitCharacter)
             {
-                return false;
+                node.ClearValue();
             }
 
-            node.ClearValue();
             return node.CanBeRemoved;
         }
     }

@@ -40,5 +40,7 @@
         }
 
         public bool CanBeRemoved => HigherNode == null && LowerNode == null && EqualNode == null && HasValue == false;
+
+        public bool CanBeSimplified => EqualNode == null && HasValue == false && (LowerNode == null) != (HigherNode == null);
     }
 }

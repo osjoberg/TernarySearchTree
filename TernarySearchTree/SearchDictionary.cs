@@ -130,8 +130,8 @@ namespace TernarySearchTree
         {
             Argument.IsNotNullAndNotEmpty(key, nameof(key));
 
-            var treeWildcardDictionaryNode = Tree.GetNode(root, key);
-            return treeWildcardDictionaryNode != null && treeWildcardDictionaryNode.HasValue;
+            var node = Tree.GetNode(root, key);
+            return node != null && node.HasValue;
         }
 
         /// <summary>
@@ -269,6 +269,17 @@ namespace TernarySearchTree
         {
             root = null;
             Count = 0;
+        }
+
+        public void Optimize()
+        {
+            foreach (var node in Tree.GetEqualNodes(root))
+            {
+                var newEqualNode = Tree.OptimizeEqualNode(node.EqualNode);
+                node.EqualNode = newEqualNode;
+            }
+
+            root = Tree.OptimizeEqualNode(root);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

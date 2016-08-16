@@ -43,6 +43,7 @@
     <Compile Include="SearchDictionary.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SplitCharacterComparer.cs" />
     <Compile Include="Tree.cs" />
     <Compile Include="Argument.cs" />
   </ItemGroup>

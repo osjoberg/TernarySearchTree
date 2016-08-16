@@ -12,13 +12,13 @@ namespace TernarySearchTree.Test
         [ExpectedException(typeof(ArgumentException))]
         public void Add()
         {
-            var dictionary = new SearchDictionary<string>();
-            const string Key = "Test";
-
-            dictionary.Add(Key, "Data");
+            var dictionary = new SearchDictionary<string>
+            {
+                { "Test", "Data" }
+            };
 
             // Test that ArgumentException is thrown.
-            dictionary.Add(Key, "Data");
+            dictionary.Add("Test", "Data");
         }
 
         [TestMethod]
@@ -26,9 +26,9 @@ namespace TernarySearchTree.Test
         {
             var dictionary = new SearchDictionary<string>
             {
-                { "a", "a" },
-                { "aa", "aa" },
-                { "c", "c" },
+                { "a", "a" }, 
+                { "aa", "aa" }, 
+                { "c", "c" }, 
                 { "b", "b" }
             };
 
@@ -40,9 +40,9 @@ namespace TernarySearchTree.Test
         {
             var dictionary = new SearchDictionary<string>
             {
-                { "a", "a" },
-                { "aa", "aa" },
-                { "c", "c" },
+                { "a", "a" }, 
+                { "aa", "aa" }, 
+                { "c", "c" }, 
                 { "b", "b" }
             };
 
@@ -54,10 +54,10 @@ namespace TernarySearchTree.Test
         {
             var allItems = new List<KeyValuePair<string, string>>
             {
-                { new KeyValuePair<string, string>("a", "a") },
-                { new KeyValuePair<string, string>("aa", "aa") },
-                { new KeyValuePair<string, string>("c", "c") },
-                { new KeyValuePair<string, string>("b", "b") },
+                new KeyValuePair<string, string>("a", "a"), 
+                new KeyValuePair<string, string>("aa", "aa"), 
+                new KeyValuePair<string, string>("c", "c"), 
+                new KeyValuePair<string, string>("b", "b"), 
             };
 
             var dictionary = new SearchDictionary<string>();
@@ -130,9 +130,9 @@ namespace TernarySearchTree.Test
         {
             var dictionary = new SearchDictionary<string>
             {
-                { "testa", "testa" },
-                { "testb", "testb" },
-                { "test", "test" },
+                { "testa", "testa" }, 
+                { "testb", "testb" }, 
+                { "test", "test" }, 
                 { "tesk", "tesk" }
             };
 
@@ -169,9 +169,9 @@ namespace TernarySearchTree.Test
         {
             var dictionary = new SearchDictionary<string>
             {
-                { "a", "a" },
-                { "aa", "aa" },
-                { "c", "c" },
+                { "a", "a" }, 
+                { "aa", "aa" }, 
+                { "c", "c" }, 
                 { "b", "b" }
             };
 
@@ -192,9 +192,9 @@ namespace TernarySearchTree.Test
         {
             var dictionary = new SearchDictionary<string>
             {
-                { "a", "a" },
-                { "aa", "aa" },
-                { "c", "c" },
+                { "a", "a" }, 
+                { "aa", "aa" }, 
+                { "c", "c" }, 
                 { "b", "b" }
             };
 
