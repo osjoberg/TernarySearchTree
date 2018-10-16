@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -34,6 +34,16 @@ namespace TernarySearchTree
         public bool IsReadOnly => false;
 
         /// <summary>
+        /// Returns all keys in the dictionary.
+        /// </summary>
+        public ICollection<string> Keys => new Collection<string>(Tree.GetAllKeys(root, "").ToArray());
+
+        /// <summary>
+        /// Returns all values in the dictionary.
+        /// </summary>
+        public ICollection<TValue> Values => new Collection<TValue>(Tree.GetAllValues(root).ToArray());
+
+        /// <summary>
         /// Get/set value by key.
         /// </summary>
         /// <param name="key">Key to get or set.</param>
@@ -45,7 +55,7 @@ namespace TernarySearchTree
                 Argument.IsNotNullAndNotEmpty(key, nameof(key));
 
                 // Find node.
-                var node = Tree.GetNode(root, key);
+                var node = Tree.GetNodeWithValue(root, key);
 
                 // If no node was found, throw exception.
                 if (node == null)
@@ -70,16 +80,6 @@ namespace TernarySearchTree
                 leafNode.Value = value;
             }
         }
-
-        /// <summary>
-        /// Returns all keys in the dictionary.
-        /// </summary>
-        public ICollection<string> Keys => new Collection<string>(Tree.GetAllKeys(root, "").ToArray());
-
-        /// <summary>
-        /// Returns all values in the dictionary.
-        /// </summary>
-        public ICollection<TValue> Values => new Collection<TValue>(Tree.GetAllValues(root).ToArray());
 
         /// <summary>
         /// Add an item to the dictionary.
@@ -130,21 +130,21 @@ namespace TernarySearchTree
         {
             Argument.IsNotNullAndNotEmpty(key, nameof(key));
 
-            var node = Tree.GetNode(root, key);
+            var node = Tree.GetNodeWithValue(root, key);
             return node != null && node.HasValue;
         }
 
         /// <summary>
         /// Determines if the dictionary contains the given item.
         /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
+        /// <param name="item">Key value pair to locate in the collection.</param>
+        /// <returns>True if item is found and false if the item could not be found.</returns>
         public bool Contains(KeyValuePair<string, TValue> item)
         {
             Argument.IsNotNull(item, nameof(item));
             Argument.IsNotNullAndNotEmpty(item.Key, nameof(item));
 
-            var node = Tree.GetNode(root, item.Key);
+            var node = Tree.GetNodeWithValue(root, item.Key);
 
             return node != null && node.HasValue && EqualityComparer<TValue>.Default.Equals(node.Value, item.Value);
         }
@@ -159,7 +159,7 @@ namespace TernarySearchTree
         {
             Argument.IsNotNullAndNotEmpty(key, nameof(key));
 
-            var node = Tree.GetNode(root, key);
+            var node = Tree.GetNodeWithValue(root, key);
             if (node == null || node.HasValue == false)
             {
                 value = default(TValue);
@@ -180,7 +180,6 @@ namespace TernarySearchTree
             Argument.IsNotNullAndNotEmpty(startOfKey, nameof(startOfKey));
 
             var node = Tree.GetNode(root, startOfKey);
-
             if (node == null)
             {
                 yield break;
@@ -222,7 +221,7 @@ namespace TernarySearchTree
         {
             Argument.IsNotNullAndNotEmpty(key, nameof(key));
 
-            var node = Tree.GetNode(root, key);
+            var node = Tree.GetNodeWithValue(root, key);
             if (node == null || node.HasValue == false)
             {
                 return false;
@@ -241,7 +240,7 @@ namespace TernarySearchTree
             Argument.IsNotNull(item, nameof(item));
             Argument.IsNotNullAndNotEmpty(item.Key, nameof(item));
 
-            var node = Tree.GetNode(root, item.Key);
+            var node = Tree.GetNodeWithValue(root, item.Key);
             if (node == null || node.HasValue == false || EqualityComparer<TValue>.Default.Equals(node.Value, item.Value) == false)
             {
                 return false;
@@ -249,17 +248,6 @@ namespace TernarySearchTree
 
             RemoveInternal(item.Key);
             return true;
-        }
-
-        private void RemoveInternal(string key)
-        {
-            Tree.RemoveNode(root, key, 0);
-            if (root.CanBeRemoved)
-            {
-                root = null;
-            }
-
-            Count--;
         }
 
         /// <summary>
@@ -280,6 +268,17 @@ namespace TernarySearchTree
             }
 
             root = Tree.OptimizeEqualNode(root);
+        }
+
+        private void RemoveInternal(string key)
+        {
+            Tree.RemoveNode(root, key, 0);
+            if (root.CanBeRemoved)
+            {
+                root = null;
+            }
+
+            Count--;
         }
 
         IEnumerator IEnumerable.GetEnumerator()

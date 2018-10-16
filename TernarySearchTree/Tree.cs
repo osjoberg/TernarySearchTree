@@ -58,7 +58,7 @@ namespace TernarySearchTree
             return middleNode;
         }
 
-        internal static Node<TValue> GetNode<TValue>(Node<TValue> node, string key)
+        internal static Node<TValue> GetNodeWithValue<TValue>(Node<TValue> node, string key)
         {
             // Setup current key index and character.
             var currentKeyCharacterIndex = 0;
@@ -83,6 +83,45 @@ namespace TernarySearchTree
                     if (++currentKeyCharacterIndex == key.Length)
                     {
                         return node.HasValue ? node : null;
+                    }
+
+                    // Advance to next split character.
+                    currentKeyCharacter = key[currentKeyCharacterIndex];
+
+                    // Set current node to equal node.
+                    node = node.EqualNode;
+                }
+            }
+
+            // If we get here there was no nodes to traverse, the key could not be found.
+            return null;
+        }
+
+        internal static Node<TValue> GetNode<TValue>(Node<TValue> node, string key)
+        {
+            // Setup current key index and character.
+            var currentKeyCharacterIndex = 0;
+            var currentKeyCharacter = key[currentKeyCharacterIndex];
+
+            // Loop while we have a node reference.
+            while (node != null)
+            {
+                if (currentKeyCharacter < node.SplitCharacter)
+                {
+                    // Set current node to lower node.
+                    node = node.LowerNode;
+                }
+                else if (currentKeyCharacter > node.SplitCharacter)
+                {
+                    // Set current node to higher node.
+                    node = node.HigherNode;
+                }
+                else
+                {
+                    // If we have processed the whole key, return node information if it has a value.
+                    if (++currentKeyCharacterIndex == key.Length)
+                    {
+                        return node;
                     }
 
                     // Advance to next split character.
