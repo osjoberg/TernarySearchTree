@@ -30,7 +30,7 @@ namespace TernarySearchTree.Benchmark
 
         protected virtual IDictionary<string, int> InsertDictionary { get; set; }
 
-        [Setup]
+        [IterationSetup]
         public virtual void Setup()
         {
             Dictionary = construct();
