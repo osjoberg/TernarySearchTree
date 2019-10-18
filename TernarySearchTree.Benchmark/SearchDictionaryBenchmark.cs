@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using BenchmarkDotNet.Attributes;
 
 namespace TernarySearchTree.Benchmark
@@ -11,7 +12,7 @@ namespace TernarySearchTree.Benchmark
         {            
         }
 
-        [Setup]
+       
         public override void Setup()
         {
             base.Setup();

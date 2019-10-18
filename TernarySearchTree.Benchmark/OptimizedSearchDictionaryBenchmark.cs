@@ -11,7 +11,6 @@ namespace TernarySearchTree.Benchmark
         {            
         }
 
-        [Setup]
         public override void Setup()
         {
             base.Setup();

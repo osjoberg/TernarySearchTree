@@ -10,19 +10,19 @@ namespace TernarySearchTree
             IsNotEmpty(argument, argumentName);
         }
 
-        internal static void IsNotNull<T>(T argument, string arguentName)
+        internal static void IsNotNull<T>(T argument, string argumentName)
         {
             if (argument == null)
             {
-                throw new ArgumentNullException(arguentName);
+                throw new ArgumentNullException(argumentName);
             }
         }
 
-        internal static void IsNotEmpty(string argument, string arguentName)
+        internal static void IsNotEmpty(string argument, string argumentName)
         {
             if (argument == null)
             {
-                throw new ArgumentException("Argument cannot be an empty string.", arguentName);
+                throw new ArgumentException("Argument cannot be an empty string.", argumentName);
             }
         }
 

@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29324.140
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TernarySearchTree", "TernarySearchTree\TernarySearchTree.csproj", "{C66F0AFC-E87F-43B0-8A2F-29F2A8C14D23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TernarySearchTree", "TernarySearchTree\TernarySearchTree.csproj", "{BE07C523-0E97-4494-BEED-A67289857D23}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TernarySearchTree.Test", "TernarySearchTree.Test\TernarySearchTree.Test.csproj", "{50FD20F9-3CBD-4523-8F91-0323B3101E34}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TernarySearchTree.Benchmark", "TernarySearchTree.Benchmark\TernarySearchTree.Benchmark.csproj", "{31A0B38C-3EAE-418A-9041-999B51653100}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TernarySearchTree.Benchmark", "TernarySearchTree.Benchmark\TernarySearchTree.Benchmark.csproj", "{38445790-D74D-4838-95DA-E4BED54228B0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TernarySearchTree.Test", "TernarySearchTree.Test\TernarySearchTree.Test.csproj", "{8C1C5319-C26B-4A80-9A9D-B2CA6AF33984}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,20 +15,23 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C66F0AFC-E87F-43B0-8A2F-29F2A8C14D23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C66F0AFC-E87F-43B0-8A2F-29F2A8C14D23}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C66F0AFC-E87F-43B0-8A2F-29F2A8C14D23}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C66F0AFC-E87F-43B0-8A2F-29F2A8C14D23}.Release|Any CPU.Build.0 = Release|Any CPU
-		{50FD20F9-3CBD-4523-8F91-0323B3101E34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{50FD20F9-3CBD-4523-8F91-0323B3101E34}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{50FD20F9-3CBD-4523-8F91-0323B3101E34}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{50FD20F9-3CBD-4523-8F91-0323B3101E34}.Release|Any CPU.Build.0 = Release|Any CPU
-		{38445790-D74D-4838-95DA-E4BED54228B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{38445790-D74D-4838-95DA-E4BED54228B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{38445790-D74D-4838-95DA-E4BED54228B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{38445790-D74D-4838-95DA-E4BED54228B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE07C523-0E97-4494-BEED-A67289857D23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE07C523-0E97-4494-BEED-A67289857D23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE07C523-0E97-4494-BEED-A67289857D23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE07C523-0E97-4494-BEED-A67289857D23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31A0B38C-3EAE-418A-9041-999B51653100}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31A0B38C-3EAE-418A-9041-999B51653100}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31A0B38C-3EAE-418A-9041-999B51653100}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31A0B38C-3EAE-418A-9041-999B51653100}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C1C5319-C26B-4A80-9A9D-B2CA6AF33984}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C1C5319-C26B-4A80-9A9D-B2CA6AF33984}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C1C5319-C26B-4A80-9A9D-B2CA6AF33984}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C1C5319-C26B-4A80-9A9D-B2CA6AF33984}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7AAC000E-AD92-449F-B0C4-8CE686AAD28A}
 	EndGlobalSection
 EndGlobal
