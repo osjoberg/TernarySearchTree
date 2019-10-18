@@ -1,7 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>1.5.1</Version>
+    <Authors>Oskar Sjöberg</Authors>
+    <Company />
+    <Product />
+    <PackageProjectUrl>https://github.com/osjoberg/TernarySearchTree</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/osjoberg/TernarySearchTree</RepositoryUrl>
+    <RepositoryType />
+    <Description>Implements a dictionary with a key of type String where a partial key can be used to find values. Implemented as a ternary search tree.
+
+Based on: 
+http://www.codeproject.com/KB/recipes/tst.aspx
+http://www.cs.otago.ac.nz/cosc463/2005/ternary.c
+http://www.cs.otago.ac.nz/cosc463/2005/ternary.pdf</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <AssemblyVersion>1.5.1.0</AssemblyVersion>
+    <FileVersion>1.5.1.0</FileVersion>
   </PropertyGroup>
 
 </Project>
