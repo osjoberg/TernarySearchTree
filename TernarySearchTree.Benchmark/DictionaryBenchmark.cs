@@ -7,65 +7,121 @@ namespace TernarySearchTree.Benchmark
 {
     public class DictionaryBenchmark
     {
-        protected static readonly HashSet<string> Keys = new HashSet<string>(Keygenerator.GenerateKeys(42, 20, '0', 'z').Distinct().Take(10000));
-        private readonly Func<IDictionary<string, int>> construct;
+        private static readonly string[] keys = Keygenerator.GenerateKeys(42, 20, '0', 'z').Distinct().Take(10000).ToArray();
+        private string[] keysInRandomOrder;
 
-        public DictionaryBenchmark() : this(() => new Dictionary<string, int>())
-        {            
-        }
+        private Dictionary<string, int> dictionary = new Dictionary<string, int>();
+        private SearchDictionary<int> searchDictionary = new SearchDictionary<int>();
+        private SearchDictionary<int> searchDictionaryOptimized = new SearchDictionary<int>();
 
-        protected DictionaryBenchmark(Func<IDictionary<string, int>> construct)
-        {
-            this.construct = construct;
-        }
-
-        [Params(/*5, 10, */20)]
-        public int KeyLength { get; set; }
-
-        protected int KeyIndex { get; set; }
-
-        protected string[] RepeatedKeys { get; set; }
-
-        protected virtual IDictionary<string, int> Dictionary { get; set; }
-
-        protected virtual IDictionary<string, int> InsertDictionary { get; set; }
-
-        [IterationSetup]
+        [GlobalSetup]
         public virtual void Setup()
         {
-            Dictionary = construct();
-            InsertDictionary = construct();
-            foreach (var key2 in Keys)
+            keysInRandomOrder = keys.ToArray();
+            new Random(42).Shuffle(keysInRandomOrder);
+
+            foreach (var key in keys)
             {
-                Dictionary.Add(key2, 0);
+                dictionary.Add(key, 0);
+                searchDictionary.Add(key, 0);
+                searchDictionaryOptimized.Add(key, 0);
             }
 
-            RepeatedKeys = Sequence.Repeat(Dictionary.Keys.Where(key => key.Length == KeyLength && Keys.Contains(key)), 100).ToArray();
-            KeyIndex = 0;
+            searchDictionaryOptimized.Optimize();
         }
 
         [Benchmark]
-        public void Insert()
+        public int Dictionary_Add()
         {
-            InsertDictionary.Add(RepeatedKeys[KeyIndex++], 0);
-        }
+            var insertDictionary = new Dictionary<string, int>();
 
-        [Benchmark]
-        public int Query()
-        {
-            return Dictionary[RepeatedKeys[KeyIndex++]];
-        }
-
-        [Benchmark]
-        public virtual int StartsWith()
-        {
-            int sum = 0;
-            foreach (var dictionaryKey in Dictionary.Keys)
+            foreach (var key in keys)
             {
-                if (dictionaryKey.StartsWith(RepeatedKeys[KeyIndex++]))
-                {
-                    sum += Dictionary[dictionaryKey];
-                }
+                insertDictionary.Add(key, 0);
+            }
+
+            return insertDictionary.Count;
+        }
+
+        [Benchmark]
+        public int SearchDictionary_Add()
+        {
+            var insertSearchDictionary = new SearchDictionary<int>();
+
+            foreach (var key in keys)
+            {
+                insertSearchDictionary.Add(key, 0);
+            }
+
+            return insertSearchDictionary.Count;
+        }
+
+        [Benchmark]
+        public int Dictionary_Lookup()
+        {
+            var sum = 0;
+
+            foreach (var key in keysInRandomOrder)
+            {
+                sum += dictionary[key];
+            }
+
+            return sum;
+        }
+
+        [Benchmark]
+        public int SearchDictionary_Lookup()
+        {
+            var sum = 0;
+
+            foreach (var key in keysInRandomOrder)
+            {
+                sum += searchDictionary[key];
+            }
+
+            return sum;
+        }
+
+        [Benchmark]
+        public int SearchDictionaryOptimized_Lookup()
+        {
+            var sum = 0;
+
+            foreach (var key in keysInRandomOrder)
+            {
+                sum += searchDictionaryOptimized[key];
+            }
+
+            return sum;
+        }
+
+        [Benchmark]
+        public int Dictionary_StartsWith()
+        {
+            var sum = 0;
+            return sum;
+        }
+
+        [Benchmark]
+        public int SearchDictionary_StartsWith()
+        {
+            var sum = 0;
+            foreach (var key in keysInRandomOrder)
+            {
+                sum += searchDictionary.StartsWith(key).Sum();
+            }
+
+            return sum;
+        }
+
+
+        [Benchmark]
+        public int SearchDictionaryOptimized_StartsWith()
+        {
+            var sum = 0;
+            foreach (var key in keysInRandomOrder)
+            {
+                sum += searchDictionaryOptimized.StartsWith(key).Sum();
             }
 
             return sum;
