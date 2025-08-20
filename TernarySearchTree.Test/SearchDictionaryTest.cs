@@ -140,6 +140,43 @@ namespace TernarySearchTree.Test
         }
 
         [TestMethod]
+        public void NearSearch()
+        {
+            var dictionary = new SearchDictionary<string>
+            {
+                { "hörlurar", "hörlurar" }, 
+                { "högtalare", "högtalare" },
+                { "höglurar", "höglurar" },
+                { "höst", "höst" },
+                { "lurarna", "lurarna" },
+                { "lurer", "lurer" },
+                { "lurar", "lurar" },
+                { "lurur", "lurur" },
+                { "lugercheck", "lugercheck" },
+            };
+
+            var result = dictionary.NearSearch("lurar", 4).OrderBy(v => v).ToArray();
+
+            CollectionAssert.AreEqual(new[]
+            {
+                "hörlurar",
+                "höglurar",
+                "lurarna",
+                "lurer",
+                "lurar",
+                "lurur",
+                "lugercheck",
+            }.OrderBy(v => v).ToArray(), result);
+            
+            var resultWithDelete = new SearchDictionary<string>
+            {
+                { "lurcheck", "lurcheck" },
+                { "luarcheck", "luarcheck" }
+            }.NearSearch("lurarcheck", 1).OrderBy(v => v).ToArray();
+            CollectionAssert.AreEqual(new[] { "luarcheck" }.OrderBy(v => v).ToArray(), resultWithDelete);
+        }
+
+        [TestMethod]
         public void SetThis()
         {
             SearchDictionary<object> dictionary = new SearchDictionary<object>();

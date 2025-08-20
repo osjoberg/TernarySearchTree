@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace TernarySearchTree
 {
@@ -224,32 +225,33 @@ namespace TernarySearchTree
                 yield return higherValueKey;
             }
         }
-
-        internal static IEnumerable<TValue> GetAllValues<TValue>(Node<TValue> node)
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static IEnumerable<TValue> GetAllValues<TValue>(Node<TValue> root)
         {
-            if (node == null)
-            {
+            if (root == null)
                 yield break;
-            }
 
-            if (node.HasValue)
-            {
-                yield return node.Value;
-            }
+            var stack = new Stack<Node<TValue>>();
+            stack.Push(root);
 
-            foreach (var lowerValue in GetAllValues(node.LowerNode))
+            while (stack.Count > 0)
             {
-                yield return lowerValue;
-            }
+                var node = stack.Pop();
+                if (node == null)
+                    continue;
 
-            foreach (var equalValue in GetAllValues(node.EqualNode))
-            {
-                yield return equalValue;
-            }
+                if (node.HasValue)
+                    yield return node.Value;
 
-            foreach (var higherValue in GetAllValues(node.HigherNode))
-            {
-                yield return higherValue;
+                if (node.HigherNode != null)
+                    stack.Push(node.HigherNode);
+
+                if (node.EqualNode != null)
+                    stack.Push(node.EqualNode);
+
+                if (node.LowerNode != null)
+                    stack.Push(node.LowerNode);
             }
         }
 

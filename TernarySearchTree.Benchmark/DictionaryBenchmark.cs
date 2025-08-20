@@ -5,6 +5,8 @@ using BenchmarkDotNet.Attributes;
 
 namespace TernarySearchTree.Benchmark
 {
+    [MinIterationCount(7)]
+    [MaxIterationCount(10)]
     public class DictionaryBenchmark
     {
         private static readonly string[] keys = Keygenerator.GenerateKeys(42, 20, '0', 'z').Distinct().Take(10000).ToArray();
@@ -122,6 +124,18 @@ namespace TernarySearchTree.Benchmark
             foreach (var key in keysInRandomOrder)
             {
                 sum += searchDictionaryOptimized.StartsWith(key).Sum();
+            }
+
+            return sum;
+        }
+        
+        [Benchmark]
+        public int SearchDictionary_NearSearch()
+        {
+            var sum = 0;
+            foreach (var key in keysInRandomOrder.ToArray())
+            {
+                sum += searchDictionary.NearSearch(key, 4).Sum();
             }
 
             return sum;
