@@ -144,6 +144,7 @@ namespace TernarySearchTree.Test
         {
             var dictionary = new SearchDictionary<string>
             {
+                { "hörlurarochannat", "hörlurarochannat" },
                 { "hörlurar", "hörlurar" }, 
                 { "högtalare", "högtalare" },
                 { "höglurar", "höglurar" },
@@ -155,25 +156,26 @@ namespace TernarySearchTree.Test
                 { "lugercheck", "lugercheck" },
             };
 
-            var result = dictionary.NearSearch("lurar", 4).OrderBy(v => v).ToArray();
+            var result = dictionary.NearSearch("lurar", 3).OrderBy(v => v.Value).ToArray();
 
             CollectionAssert.AreEqual(new[]
             {
-                "hörlurar",
-                "höglurar",
-                "lurarna",
-                "lurer",
-                "lurar",
-                "lurur",
-                "lugercheck",
-            }.OrderBy(v => v).ToArray(), result);
+                new DistancedValue<string>(3, "hörlurarochannat"),
+                new DistancedValue<string>(3, "hörlurar"),
+                new DistancedValue<string>(3, "höglurar"),
+                new DistancedValue<string>(0, "lurarna"),
+                new DistancedValue<string>(1, "lurer"),
+                new DistancedValue<string>(0, "lurar"),
+                new DistancedValue<string>(1, "lurur"),
+                new DistancedValue<string>(2, "lugercheck"),
+            }.OrderBy(v => v.Value).ToArray(), result);
             
             var resultWithDelete = new SearchDictionary<string>
             {
                 { "lurcheck", "lurcheck" },
                 { "luarcheck", "luarcheck" }
-            }.NearSearch("lurarcheck", 1).OrderBy(v => v).ToArray();
-            CollectionAssert.AreEqual(new[] { "luarcheck" }.OrderBy(v => v).ToArray(), resultWithDelete);
+            }.NearSearch("lurarcheck", 1).OrderBy(v => v.Value).ToArray();
+            CollectionAssert.AreEqual(new[] { new DistancedValue<string>(1, "luarcheck") }.OrderBy(v => v.Value).ToArray(), resultWithDelete);
         }
 
         [TestMethod]

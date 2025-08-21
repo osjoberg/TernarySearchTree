@@ -203,8 +203,8 @@ namespace TernarySearchTree
         /// </summary>
         /// <param name="key">Key to search for</param>
         /// <param name="distance">Distance to match. In essence, the allowed error</param>
-        /// <returns>List of values matching key.</returns>
-        public IEnumerable<TValue> NearSearch(string key, int distance)
+        /// <returns>List of values matching key, with their distance towards the search key.</returns>
+        public IEnumerable<DistancedValue<TValue>> NearSearch(string key, int distance)
         {
             Argument.IsNotNullAndNotEmpty(key, nameof(key));
 
@@ -235,6 +235,8 @@ namespace TernarySearchTree
                 var currentRow = new int[key.Length + 1];
                 currentRow[0] = previousRow[0] + 1; // the first column is increasing from the one above in the table (deletion)
 
+                var minInRow = currentRow[0];
+
                 for (var i = 1; i <= key.Length; i++)
                 {
                     var delete = previousRow[i] + 1; // Delete operations take the value above + 1
@@ -242,28 +244,40 @@ namespace TernarySearchTree
                     var substitute = previousRow[i - 1] + (key[i - 1] == node.SplitCharacter ? 0 : 1); // Substitution is free (compared to upper left) if there is a match (substitute a for a), otherwise it costs 1 
                     
                     currentRow[i] = Math.Min(Math.Min(delete, insert), substitute);
+                    if (currentRow[i] < minInRow)
+                    {
+                        minInRow = currentRow[i];
+                    }
                 }
-
-                // If the current tree path is within the edit distance, dump the entire subtree.
-                // In other words, we consider suffixes to be free
-                if (currentRow[key.Length] <= distance)
+                
+                // Dump the tree if the distance from the search term to the child is within the allowed distance.
+                // Also dump the tree if the current node has consumed the entire key and the distance between them is within the allowed distance.
+                if (currentRow[^1] <= distance && (currentRow[0] == key.Length || node.HasValue))
                 {
                     if (node.HasValue)
                     {
-                        yield return node.Value;   
+                        yield return new DistancedValue<TValue>
+                        {
+                            Distance = currentRow[^1],
+                            Value = node.Value
+                        };
                     }
 
                     if (node.EqualNode != null)
                     {
                         foreach (var v in Tree.GetAllValues(node.EqualNode))
                         {
-                            yield return v;   
+                            yield return new DistancedValue<TValue>
+                            {
+                                Distance = currentRow[^1],
+                                Value = v
+                            };
                         }
                     }
                     continue;
                 }
 
-                if (currentRow.Min() > distance)
+                if (minInRow > distance)
                 {
                     // There is no point in continuing down this branch, as it is too far away. (The distance can only increase, and our lowest is already over limit)
                     continue;

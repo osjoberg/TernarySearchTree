@@ -135,7 +135,7 @@ namespace TernarySearchTree.Benchmark
             var sum = 0;
             foreach (var key in keysInRandomOrder.ToArray())
             {
-                sum += searchDictionary.NearSearch(key, 4).Sum();
+                sum += searchDictionary.NearSearch(key, 4).Select(v => v.Value).Sum();
             }
 
             return sum;
