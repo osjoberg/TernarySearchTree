@@ -116,6 +116,19 @@ public class DictionaryBenchmark
             sum += searchDictionaryOptimized.StartsWith(key).Sum();
         }
 
-        return sum;
+            return sum;
+        }
+        
+        [Benchmark]
+        public int SearchDictionary_NearSearch()
+        {
+            var sum = 0;
+            foreach (var key in keysInRandomOrder.ToArray())
+            {
+                sum += searchDictionary.NearSearch(key, 4).Select(v => v.Value).Sum();
+            }
+
+            return sum;
+        }
     }
 }
