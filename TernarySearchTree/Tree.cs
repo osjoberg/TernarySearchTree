@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace TernarySearchTree;
 
@@ -236,12 +235,8 @@ internal static class Tree
         {
             if (node.HasValue)
             {
-                var node = stack.Pop();
-                if (node == null)
-                    continue;
-
-                if (node.HasValue)
-                    yield return node.Value;
+                yield return node.Value;
+            }
 
             if (node.LowerNode != null)
             {

@@ -199,6 +199,105 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
     }
 
     /// <summary>
+    /// Gets all items starting with the specified key, allowing a specified edit distance to be matched.
+    /// A distance is noted as either an insert, edit or delete.
+    /// Note that items whose keys have a large distance will be returned if they are long and starts with the specified key.
+    /// </summary>
+    /// <param name="startOfKey">Start of keys to match.</param>
+    /// <param name="maxEditDistance">Maximum edit distance to match.</param>
+    /// <returns>List of values matching key, with their edit distance towards the search key.</returns>
+    public IEnumerable<SearchMatch<TValue>> StartsWith(string startOfKey, int maxEditDistance)
+    {
+        if (root == null)
+        {
+            yield break;
+        }
+
+        Argument.IsNotNullAndNotEmpty(startOfKey, nameof(startOfKey));
+
+        // Initialize a Levenshtein table with no consumption (i.e.only 1 row).
+        var init = Enumerable.Range(0, startOfKey.Length + 1).ToArray();
+
+        var stack = new Stack<(Node<TValue> node, int[] row)>();
+        stack.Push((root, init));
+
+        while (stack.Count > 0)
+        {
+            var (node, previousRow) = stack.Pop();
+
+            // Traverse side branches without advancing along the path.
+            // They are on a step earlier from us (consuming them will cost), so it is free to check them, result in reuse of levenshtein row.
+            if (node.LowerNode != null)
+            {
+                stack.Push((node.LowerNode, previousRow));
+            }
+
+            if (node.HigherNode != null)
+            {
+                stack.Push((node.HigherNode, previousRow));
+            }
+
+            // Build next row for this node's split char.
+            var currentRow = new int[startOfKey.Length + 1];
+
+            // The first column is increasing from the one above in the table (deletion).
+            currentRow[0] = previousRow[0] + 1; 
+
+            var minInRow = currentRow[0];
+
+            for (var i = 1; i <= startOfKey.Length; i++)
+            {
+                // Delete operations take the value above + 1.
+                var delete = previousRow[i] + 1;
+
+                // Insert operations take the value to the left + 1.
+                var insert = currentRow[i - 1] + 1;
+
+                // Substitution is free (compared to upper left) if there is a match (substitute a for a), otherwise it costs 1 .
+                var substitute = previousRow[i - 1] + (startOfKey[i - 1] == node.SplitCharacter ? 0 : 1); 
+
+                currentRow[i] = Math.Min(Math.Min(delete, insert), substitute);
+                if (currentRow[i] < minInRow)
+                {
+                    minInRow = currentRow[i];
+                }
+            }
+
+            // Dump the tree if the distance from the search term to the child is within the allowed distance.
+            // Also dump the tree if the current node has consumed the entire key and the distance between them is within the allowed distance.
+            if (currentRow[^1] <= maxEditDistance && (currentRow[0] == startOfKey.Length || node.HasValue))
+            {
+                if (node.HasValue)
+                {
+                    yield return new SearchMatch<TValue>(node.Value, currentRow[^1]);
+                }
+
+                if (node.EqualNode != null)
+                {
+                    foreach (var v in Tree.GetAllValues(node.EqualNode))
+                    {
+                        yield return new SearchMatch<TValue>(v, currentRow[^1]);
+                    }
+                }
+
+                continue;
+            }
+
+            if (minInRow > maxEditDistance)
+            {
+                // There is no point in continuing down this branch, as it is too far away. (The distance can only increase, and our lowest is already over limit).
+                continue;
+            }
+
+            if (node.EqualNode != null)
+            {
+                // Move down the tree. By sending currentRow we are telling the tree that we are consuming it.
+                stack.Push((node.EqualNode, currentRow));
+            }
+        }
+    }
+
+    /// <summary>
     /// Copy the dictionary to an array.
     /// </summary>
     /// <param name="array">Array to copy to.</param>
@@ -247,101 +346,6 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
         {
             return false;
         }
-        
-        /// <summary>
-        /// Gets all items starting with the specified key, allowing a specified distance to be matched.
-        /// A distance is noted as either an insert, edit or delete.
-        /// Note that items whose keys have a large distance will be returned if they are long and starts with the specified key.
-        /// </summary>
-        /// <param name="key">Key to search for</param>
-        /// <param name="distance">Distance to match. In essence, the allowed error</param>
-        /// <returns>List of values matching key, with their distance towards the search key.</returns>
-        public IEnumerable<DistancedValue<TValue>> NearSearch(string key, int distance)
-        {
-            Argument.IsNotNullAndNotEmpty(key, nameof(key));
-
-            // Initialize a Levenshtein table with no consumption (i.e.only 1 row)
-            var init = Enumerable.Range(0, key.Length + 1).ToArray();
-
-            var stack = new Stack<(Node<TValue> node, int[] row)>();
-            stack.Push((root, init));
-
-            while (stack.Count > 0)
-            {
-                var (node, previousRow) = stack.Pop();
-                if (node == null) continue;
-
-                // traverse side branches without advancing along the path
-                // they are on a step earlier from us (consuming them will cost), so it is free to check them, result in reuse of levenshtein row
-                if (node.LowerNode != null)
-                {
-                    stack.Push((node.LowerNode, previousRow));
-                }
-
-                if (node.HigherNode != null)
-                {
-                    stack.Push((node.HigherNode, previousRow));
-                }
-
-                // build next row for this node's split char
-                var currentRow = new int[key.Length + 1];
-                currentRow[0] = previousRow[0] + 1; // the first column is increasing from the one above in the table (deletion)
-
-                var minInRow = currentRow[0];
-
-                for (var i = 1; i <= key.Length; i++)
-                {
-                    var delete = previousRow[i] + 1; // Delete operations take the value above + 1
-                    var insert = currentRow[i - 1] + 1; // Insert operations take the value to the left + 1
-                    var substitute = previousRow[i - 1] + (key[i - 1] == node.SplitCharacter ? 0 : 1); // Substitution is free (compared to upper left) if there is a match (substitute a for a), otherwise it costs 1 
-                    
-                    currentRow[i] = Math.Min(Math.Min(delete, insert), substitute);
-                    if (currentRow[i] < minInRow)
-                    {
-                        minInRow = currentRow[i];
-                    }
-                }
-                
-                // Dump the tree if the distance from the search term to the child is within the allowed distance.
-                // Also dump the tree if the current node has consumed the entire key and the distance between them is within the allowed distance.
-                if (currentRow[^1] <= distance && (currentRow[0] == key.Length || node.HasValue))
-                {
-                    if (node.HasValue)
-                    {
-                        yield return new DistancedValue<TValue>
-                        {
-                            Distance = currentRow[^1],
-                            Value = node.Value
-                        };
-                    }
-
-                    if (node.EqualNode != null)
-                    {
-                        foreach (var v in Tree.GetAllValues(node.EqualNode))
-                        {
-                            yield return new DistancedValue<TValue>
-                            {
-                                Distance = currentRow[^1],
-                                Value = v
-                            };
-                        }
-                    }
-                    continue;
-                }
-
-                if (minInRow > distance)
-                {
-                    // There is no point in continuing down this branch, as it is too far away. (The distance can only increase, and our lowest is already over limit)
-                    continue;
-                }
-
-                if (node.EqualNode != null)
-                {
-                    // Move down the tree. By sending currentRow we are telling the tree that we are consuming it.
-                    stack.Push((node.EqualNode, currentRow));
-                }
-            }
-        }
 
         RemoveInternal(item.Key);
         return true;
@@ -373,7 +377,7 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
     private void RemoveInternal(string key)
     {
         Tree.RemoveNode(root, key, 0);
-        if (root.CanBeRemoved)
+        if (root!.CanBeRemoved)
         {
             root = null;
         }
