@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+[assembly: Parallelize(Workers = 0, Scope = ExecutionScope.MethodLevel)]
+
 namespace TernarySearchTree.Test
 {
     [TestClass]
@@ -54,10 +56,10 @@ namespace TernarySearchTree.Test
         {
             var allItems = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("a", "a"), 
-                new KeyValuePair<string, string>("aa", "aa"), 
-                new KeyValuePair<string, string>("c", "c"), 
-                new KeyValuePair<string, string>("b", "b"), 
+                new("a", "a"), 
+                new("aa", "aa"), 
+                new("c", "c"), 
+                new("b", "b"), 
             };
 
             var dictionary = new SearchDictionary<string>();
@@ -72,53 +74,53 @@ namespace TernarySearchTree.Test
         [TestMethod]
         public void ContainsKey()
         {
-            SearchDictionary<string> dictionary = new SearchDictionary<string>();
-            const string Key = "Test";
+            var dictionary = new SearchDictionary<string>();
+            const string key = "Test";
 
             // Test that the key does exist.
-            Assert.IsFalse(dictionary.ContainsKey(Key));
+            Assert.IsFalse(dictionary.ContainsKey(key));
 
-            dictionary.Add(Key, "Data");
+            dictionary.Add(key, "Data");
 
             // Test that the key exist.
-            Assert.IsTrue(dictionary.ContainsKey(Key));
-            Assert.IsFalse(dictionary.ContainsKey(Key.Substring(0, 3)));
-            Assert.IsFalse(dictionary.ContainsKey(Key + "t"));
+            Assert.IsTrue(dictionary.ContainsKey(key));
+            Assert.IsFalse(dictionary.ContainsKey(key.Substring(0, 3)));
+            Assert.IsFalse(dictionary.ContainsKey(key + "t"));
         }
 
         [TestMethod]
         [ExpectedException(typeof(KeyNotFoundException))]
         public void GetThis()
         {
-            SearchDictionary<object> dictionary = new SearchDictionary<object>();
-            const string Key = "Test";
-            object object1 = new object();
-            object object2 = new object();
+            var dictionary = new SearchDictionary<object>();
+            const string ley = "Test";
+            var object1 = new object();
+            var object2 = new object();
 
-            dictionary.Add(Key + 1, object1);
-            dictionary.Add(Key + 2, object2);
+            dictionary.Add(ley + 1, object1);
+            dictionary.Add(ley + 2, object2);
 
             // Test that key1 maps to object1 and key2 maps to object2.
-            Assert.AreEqual(object1, dictionary[Key + 1]);
-            Assert.AreEqual(object2, dictionary[Key + 2]);
+            Assert.AreEqual(object1, dictionary[ley + 1]);
+            Assert.AreEqual(object2, dictionary[ley + 2]);
 
             // Test that KeyNotFoundException is thrown.
-            var obj = dictionary[Key + 3];
+            var obj = dictionary[ley + 3];
         }
 
         [TestMethod]
         public void GetCount()
         {
-            SearchDictionary<string> dictionary = new SearchDictionary<string>();
-            const string Key = "Test";
-            const int Count = 34;
+            var dictionary = new SearchDictionary<string>();
+            const string key = "Test";
+            const int count = 34;
 
             // Test that the dictionary count is 0.
             Assert.AreEqual(dictionary.Count, 0);
 
-            for (int i = 1; i <= Count; i++)
+            for (var i = 1; i <= count; i++)
             {
-                dictionary.Add(Key + i, null);
+                dictionary.Add(key + i, "");
 
                 // Test that the count is i.
                 Assert.AreEqual(i, dictionary.Count);
@@ -142,26 +144,26 @@ namespace TernarySearchTree.Test
         [TestMethod]
         public void SetThis()
         {
-            SearchDictionary<object> dictionary = new SearchDictionary<object>();
-            const string Key = "Test";
-            object object1 = new object();
-            object object2 = new object();
+            var dictionary = new SearchDictionary<object>();
+            const string key = "Test";
+            var object1 = new object();
+            var object2 = new object();
 
-            dictionary[Key + 1] = object2;
-            dictionary[Key + 2] = object1;
+            dictionary[key + 1] = object2;
+            dictionary[key + 2] = object1;
 
             // Test that the count is 2.
             Assert.AreEqual(2, dictionary.Count);
 
-            dictionary[Key + 1] = object1;
-            dictionary[Key + 2] = object2;
+            dictionary[key + 1] = object1;
+            dictionary[key + 2] = object2;
 
             // Test that the count is 2.
             Assert.AreEqual(2, dictionary.Count);
 
             // Test that key1 maps to object1 and key2 maps to object2.
-            Assert.AreEqual(object1, dictionary[Key + 1]);
-            Assert.AreEqual(object2, dictionary[Key + 2]);
+            Assert.AreEqual(object1, dictionary[key + 1]);
+            Assert.AreEqual(object2, dictionary[key + 2]);
         }
 
         [TestMethod]
@@ -175,10 +177,12 @@ namespace TernarySearchTree.Test
                 { "b", "b" }
             };
 
+            dictionary.Remove("d");
             dictionary.Remove("a");
             dictionary.Remove("b");
             dictionary.Remove("c");
             dictionary.Remove("aa");
+            dictionary.Remove("d");
 
             Assert.AreEqual(0, dictionary.Count);
             Assert.IsFalse(dictionary.ContainsKey("a"));
@@ -198,9 +202,11 @@ namespace TernarySearchTree.Test
                 { "b", "b" }
             };
 
+            dictionary.Remove("d");
             dictionary.Remove("a");
             dictionary.Remove("b");
             dictionary.Remove("c");
+            dictionary.Remove("d");
 
             Assert.AreEqual(1, dictionary.Count);
             Assert.IsFalse(dictionary.ContainsKey("a"));
@@ -209,15 +215,17 @@ namespace TernarySearchTree.Test
             Assert.IsTrue(dictionary.ContainsKey("aa"));
         }
 
+
+
         [TestMethod]
         public void Clear()
         {
-            SearchDictionary<string> dictionary = new SearchDictionary<string>();
-            const string Key = "Test";
+            var dictionary = new SearchDictionary<string>();
+            const string key = "Test";
 
-            dictionary.Add(Key, "data");
+            dictionary.Add(key, "data");
             dictionary.Clear();
-            dictionary.Add(Key, "data");
+            dictionary.Add(key, "data");
             dictionary.Clear();
 
             // Test that the dictionary count is 0.

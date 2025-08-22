@@ -1,12 +1,11 @@
 ﻿using BenchmarkDotNet.Running;
 
-namespace TernarySearchTree.Benchmark
+namespace TernarySearchTree.Benchmark;
+
+public static class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
-        {
-            BenchmarkRunner.Run<DictionaryBenchmark>();
-        }
+        BenchmarkRunner.Run<DictionaryBenchmark>();
     }
 }

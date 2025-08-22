@@ -1,355 +1,376 @@
 ﻿using System.Collections.Generic;
 
-namespace TernarySearchTree
+namespace TernarySearchTree;
+
+internal static class Tree
 {
-    internal static class Tree
+    internal static void GetSiblings<TValue>(Node<TValue> node, List<Node<TValue>> siblings)
     {
-        internal static void GetSiblings<TValue>(Node<TValue> node, IList<Node<TValue>> siblings)
+        siblings.Add(node);
+
+        if (node.LowerNode != null)
         {
-            if (node == null)
-            {
-                return;
-            }
-
-            siblings.Add(node);
-
             GetSiblings(node.LowerNode, siblings);
+        }
+
+        if (node.HigherNode != null)
+        {
             GetSiblings(node.HigherNode, siblings);
         }
+    }
 
-        internal static IEnumerable<Node<TValue>> GetEqualNodes<TValue>(Node<TValue> node)
+    internal static Node<TValue>? OptimizeEqualNode<TValue>(Node<TValue>? equalNode)
+    {
+        if (equalNode == null)
         {
-            foreach (var n in GetAllNodes(node))
-            {
-                if (n.EqualNode != null)
-                {
-                    yield return node;
-                }
-            }
-        }
-
-        internal static Node<TValue> OptimizeEqualNode<TValue>(Node<TValue> equalNode)
-        {
-            var siblings = new List<Node<TValue>>();
-            GetSiblings(equalNode, siblings);
-            siblings.Sort(new SplitCharacterComparer<TValue>());
-
-            return OptimizeSiblings(siblings, 0, siblings.Count);
-        }
-
-        internal static Node<TValue> OptimizeSiblings<TValue>(IList<Node<TValue>> nodes, int index, int count)
-        {
-            if (count == 0)
-            {
-                return null;
-            }
-
-            if (count == 1)
-            {
-                var leafNode = nodes[index];
-                leafNode.LowerNode = null;
-                leafNode.HigherNode = null;
-                return leafNode;
-            }
-
-            var middleNode = nodes[index + count / 2];
-            middleNode.LowerNode = OptimizeSiblings<TValue>(nodes, index, count / 2);
-            middleNode.HigherNode = OptimizeSiblings<TValue>(nodes, index + count / 2 + 1, (count - 1) / 2);
-            return middleNode;
-        }
-
-        internal static Node<TValue> GetNodeWithValue<TValue>(Node<TValue> node, string key)
-        {
-            // Setup current key index and character.
-            var currentKeyCharacterIndex = 0;
-            var currentKeyCharacter = key[currentKeyCharacterIndex];
-
-            // Loop while we have a node reference.
-            while (node != null)
-            {
-                if (currentKeyCharacter < node.SplitCharacter)
-                {
-                    // Set current node to lower node.
-                    node = node.LowerNode;
-                }
-                else if (currentKeyCharacter > node.SplitCharacter)
-                {
-                    // Set current node to higher node.
-                    node = node.HigherNode;
-                }
-                else
-                {
-                    // If we have processed the whole key, return node information if it has a value.
-                    if (++currentKeyCharacterIndex == key.Length)
-                    {
-                        return node.HasValue ? node : null;
-                    }
-
-                    // Advance to next split character.
-                    currentKeyCharacter = key[currentKeyCharacterIndex];
-
-                    // Set current node to equal node.
-                    node = node.EqualNode;
-                }
-            }
-
-            // If we get here there was no nodes to traverse, the key could not be found.
             return null;
         }
 
-        internal static Node<TValue> GetNode<TValue>(Node<TValue> node, string key)
+        var siblings = new List<Node<TValue>>();
+        GetSiblings(equalNode, siblings);
+        siblings.Sort(new SplitCharacterComparer<TValue>());
+
+        return OptimizeSiblings(siblings, 0, siblings.Count);
+    }
+
+    internal static Node<TValue>? OptimizeSiblings<TValue>(List<Node<TValue>> nodes, int index, int count)
+    {
+        if (count == 0)
         {
-            // Setup current key index and character.
-            var currentKeyCharacterIndex = 0;
-            var currentKeyCharacter = key[currentKeyCharacterIndex];
-
-            // Loop while we have a node reference.
-            while (node != null)
-            {
-                if (currentKeyCharacter < node.SplitCharacter)
-                {
-                    // Set current node to lower node.
-                    node = node.LowerNode;
-                }
-                else if (currentKeyCharacter > node.SplitCharacter)
-                {
-                    // Set current node to higher node.
-                    node = node.HigherNode;
-                }
-                else
-                {
-                    // If we have processed the whole key, return node information if it has a value.
-                    if (++currentKeyCharacterIndex == key.Length)
-                    {
-                        return node;
-                    }
-
-                    // Advance to next split character.
-                    currentKeyCharacter = key[currentKeyCharacterIndex];
-
-                    // Set current node to equal node.
-                    node = node.EqualNode;
-                }
-            }
-
-            // If we get here there was no nodes to traverse, the key could not be found.
             return null;
         }
 
-        internal static Node<TValue> CreateNodes<TValue>(ref Node<TValue> root, string key)
+        if (count == 1)
         {
-            // Setup current key index and character.
-            var currentKeyCharacterIndex = 0;
-            var currentKeyCharacter = key[currentKeyCharacterIndex];
+            var leafNode = nodes[index];
+            leafNode.LowerNode = null;
+            leafNode.HigherNode = null;
+            return leafNode;
+        }
 
-            // Create a root node if it does not exist.
-            if (root == null)
+        var middleNode = nodes[index + count / 2];
+        middleNode.LowerNode = OptimizeSiblings(nodes, index, count / 2);
+        middleNode.HigherNode = OptimizeSiblings(nodes, index + count / 2 + 1, (count - 1) / 2);
+        return middleNode;
+    }
+
+    internal static Node<TValue>? GetNodeWithValue<TValue>(Node<TValue>? node, string key)
+    {
+        // Setup current key index and character.
+        var currentKeyCharacterIndex = 0;
+        var currentKeyCharacter = key[currentKeyCharacterIndex];
+
+        // Loop while we have a node reference.
+        while (node != null)
+        {
+            if (currentKeyCharacter < node.SplitCharacter)
             {
-                root = new Node<TValue>(currentKeyCharacter);
+                // Set current node to lower node.
+                node = node.LowerNode;
             }
-
-            // Get current node.
-            var node = root;
-
-            // Loop until we have added the key and value.
-            for (;;)
+            else if (currentKeyCharacter > node.SplitCharacter)
             {
-                if (currentKeyCharacter < node.SplitCharacter)
+                // Set current node to higher node.
+                node = node.HigherNode;
+            }
+            else
+            {
+                // If we have processed the whole key, return node information if it has a value.
+                if (++currentKeyCharacterIndex == key.Length)
                 {
-                    // If no lower node exists, create a new lower node.
-                    if (node.LowerNode == null)
-                    {
-                        node.LowerNode = new Node<TValue>(currentKeyCharacter);
-                    }
-
-                    // Set current node to lower node.
-                    node = node.LowerNode;
+                    return node.HasValue ? node : null;
                 }
-                else if (currentKeyCharacter > node.SplitCharacter)
-                {
-                    // If no higher node exists, create a new higher node.
-                    if (node.HigherNode == null)
-                    {
-                        node.HigherNode = new Node<TValue>(currentKeyCharacter);
-                    }
 
-                    // Set current node to higher node.
-                    node = node.HigherNode;
-                }
-                else if (++currentKeyCharacterIndex < key.Length)
-                {
-                    // Advance to next split character.
-                    currentKeyCharacter = key[currentKeyCharacterIndex];
+                // Advance to next split character.
+                currentKeyCharacter = key[currentKeyCharacterIndex];
 
-                    // Create new equal node if it does not exist.
-                    if (node.EqualNode == null)
-                    {
-                        node.EqualNode = new Node<TValue>(currentKeyCharacter);
-                    }
+                // Set current node to equal node.
+                node = node.EqualNode;
+            }
+        }
 
-                    // Set current node to equal node.
-                    node = node.EqualNode;
-                }
-                else
+
+        // If we get here there were no nodes to traverse, the key could not be found.
+        return null;
+    }
+
+    internal static Node<TValue>? GetNode<TValue>(Node<TValue>? node, string key)
+    {
+        // Setup current key index and character.
+        var currentKeyCharacterIndex = 0;
+        var currentKeyCharacter = key[currentKeyCharacterIndex];
+
+        // Loop while we have a node reference.
+        while (node != null)
+        {
+            if (currentKeyCharacter < node.SplitCharacter)
+            {
+                // Set current node to lower node.
+                node = node.LowerNode;
+            }
+            else if (currentKeyCharacter > node.SplitCharacter)
+            {
+                // Set current node to higher node.
+                node = node.HigherNode;
+            }
+            else
+            {
+                // If we have processed the whole key, return node information if it has a value.
+                if (++currentKeyCharacterIndex == key.Length)
                 {
                     return node;
                 }
+
+                // Advance to next split character.
+                currentKeyCharacter = key[currentKeyCharacterIndex];
+
+                // Set current node to equal node.
+                node = node.EqualNode;
             }
         }
 
-        internal static IEnumerable<string> GetAllKeys<TValue>(Node<TValue> node, string key)
+        // If we get here there were no nodes to traverse, the key could not be found.
+        return null;
+    }
+
+    internal static Node<TValue> CreateNodes<TValue>(ref Node<TValue>? root, string key)
+    {
+        // Setup current key index and character.
+        var currentKeyCharacterIndex = 0;
+        var currentKeyCharacter = key[currentKeyCharacterIndex];
+
+        // Create a root node if it does not exist.
+        if (root == null)
         {
-            if (node == null)
+            root = new Node<TValue>(currentKeyCharacter);
+        }
+
+        // Get current node.
+        var node = root;
+
+        // Loop until we have added the key and value.
+        for (;;)
+        {
+            if (currentKeyCharacter < node.SplitCharacter)
             {
-                yield break;
+                // If no lower node exists, create a new lower node.
+                node.LowerNode ??= new Node<TValue>(currentKeyCharacter);
+
+                // Set current node to lower node.
+                node = node.LowerNode;
             }
+            else if (currentKeyCharacter > node.SplitCharacter)
+            {
+                // If no higher node exists, create a new higher node.
+                node.HigherNode ??= new Node<TValue>(currentKeyCharacter);
+
+                // Set current node to higher node.
+                node = node.HigherNode;
+            }
+            else if (++currentKeyCharacterIndex < key.Length)
+            {
+                // Advance to next split character.
+                currentKeyCharacter = key[currentKeyCharacterIndex];
+
+                // Create new equal node if it does not exist.
+                node.EqualNode ??= new Node<TValue>(currentKeyCharacter);
+
+                // Set current node to equal node.
+                node = node.EqualNode;
+            }
+            else
+            {
+                return node;
+            }
+        }
+    }
+
+    internal static IEnumerable<string> GetAllKeys<TValue>(Node<TValue>? root)
+    {
+        if (root == null)
+        {
+            yield break;
+        }
+
+        var stack = new Stack<(Node<TValue>, string)>();
+        stack.Push((root, ""));
+
+        while (stack.TryPop(out var pair))
+        {
+            var (node, key) = pair;
 
             if (node.HasValue)
             {
                 yield return key + node.SplitCharacter;
             }
 
-            foreach (var lowerValueKey in GetAllKeys(node.LowerNode, key))
+            if (node.LowerNode != null)
             {
-                yield return lowerValueKey;
+                stack.Push((node.LowerNode, key));
             }
 
-            foreach (var equalValueKey in GetAllKeys(node.EqualNode, key + node.SplitCharacter))
+            if (node.EqualNode != null)
             {
-                yield return equalValueKey;
+                stack.Push((node.EqualNode, key + node.SplitCharacter));
             }
 
-            foreach (var higherValueKey in GetAllKeys(node.HigherNode, key))
+            if (node.HigherNode != null)
             {
-                yield return higherValueKey;
+                stack.Push((node.HigherNode, key));
             }
         }
+    }
 
-        internal static IEnumerable<TValue> GetAllValues<TValue>(Node<TValue> node)
+    internal static IEnumerable<TValue> GetAllValues<TValue>(Node<TValue>? root)
+    {
+        if (root == null)
         {
-            if (node == null)
-            {
-                yield break;
-            }
+            yield break;
+        }
 
+        var stack = new Stack<Node<TValue>>();
+        stack.Push(root);
+
+        while (stack.TryPop(out var node))
+        {
             if (node.HasValue)
             {
                 yield return node.Value;
             }
 
-            foreach (var lowerValue in GetAllValues(node.LowerNode))
+            if (node.LowerNode != null)
             {
-                yield return lowerValue;
+                stack.Push(node.LowerNode);
             }
 
-            foreach (var equalValue in GetAllValues(node.EqualNode))
+            if (node.EqualNode != null)
             {
-                yield return equalValue;
+                stack.Push(node.EqualNode);
             }
 
-            foreach (var higherValue in GetAllValues(node.HigherNode))
+            if (node.HigherNode != null)
             {
-                yield return higherValue;
+                stack.Push(node.HigherNode);
             }
         }
+    }
 
-        internal static IEnumerable<Node<TValue>> GetAllNodes<TValue>(Node<TValue> node)
+    internal static IEnumerable<Node<TValue>> GetAllNodes<TValue>(Node<TValue>? root)
+    {
+        if (root == null)
         {
-            if (node == null)
-            {
-                yield break;
-            }
+            yield break;
+        }
 
+        var stack = new Stack<Node<TValue>>();
+        stack.Push(root);
+
+        while (stack.TryPop(out var node))
+        {
             yield return node;
 
-            foreach (var lowerNode in GetAllNodes(node.LowerNode))
+            if (node.LowerNode != null)
             {
-                yield return lowerNode;
+                stack.Push(node.LowerNode);
             }
 
-            foreach (var equalNode in GetAllNodes(node.EqualNode))
+            if (node.EqualNode != null)
             {
-                yield return equalNode;
+                stack.Push(node.EqualNode);
             }
 
-            foreach (var higherNode in GetAllNodes(node.HigherNode))
+            if (node.HigherNode != null)
             {
-                yield return higherNode;
+                stack.Push(node.HigherNode);
             }
         }
+    }
 
-        internal static IEnumerable<KeyValuePair<string, TValue>> GetAllKeyValuePairs<TValue>(Node<TValue> node, string key)
+    internal static IEnumerable<KeyValuePair<string, TValue>> GetAllKeyValuePairs<TValue>(Node<TValue>? root)
+    {
+        if (root == null)
         {
-            if (node == null)
-            {
-                yield break;
-            }
+            yield break;
+        }
+
+        var stack = new Stack<(Node<TValue>, string)>();
+
+        stack.Push((root, ""));
+
+        while (stack.TryPop(out var pair))
+        {
+            var (node, key) = pair;
 
             if (node.HasValue)
             {
                 yield return new KeyValuePair<string, TValue>(key + node.SplitCharacter, node.Value);
             }
 
-            foreach (var lowerKeyValuePair in GetAllKeyValuePairs(node.LowerNode, key))
+            if (node.LowerNode != null)
             {
-                yield return lowerKeyValuePair;
+                stack.Push((node.LowerNode, key));
             }
 
-            foreach (var equalKeyValuePair in GetAllKeyValuePairs(node.EqualNode, key + node.SplitCharacter))
+            if (node.EqualNode != null)
             {
-                yield return equalKeyValuePair;
+                stack.Push((node.EqualNode, key + node.SplitCharacter));
             }
 
-            foreach (var higherKeyValuePair in GetAllKeyValuePairs(node.HigherNode, key))
+            if (node.HigherNode != null)
             {
-                yield return higherKeyValuePair;
+                stack.Push((node.HigherNode, key));
             }
         }
+    }
 
-        internal static bool RemoveNode<TValue>(Node<TValue> node, string key, int keyIndex)
+    internal static bool RemoveNode<TValue>(Node<TValue>? node, string key, int keyIndex)
+    {
+        if (node == null)
         {
-            var currentKeyCharacter = key[keyIndex];
+            return false;
+        }
 
-            if (currentKeyCharacter < node.SplitCharacter)
+        var currentKeyCharacter = key[keyIndex];
+
+        if (currentKeyCharacter < node.SplitCharacter && node.LowerNode != null)
+        {
+            if (RemoveNode(node.LowerNode, key, keyIndex))
             {
-                if (RemoveNode(node.LowerNode, key, keyIndex))
-                {
-                    node.LowerNode = null;
-                    return node.CanBeRemoved;
-                }
-
-                if (node.LowerNode.CanBeSimplified)
-                {
-                    node.LowerNode = node.LowerNode.LowerNode ?? node.LowerNode.HigherNode;
-                }
-            }
-
-            if (currentKeyCharacter > node.SplitCharacter)
-            {
-                if (RemoveNode(node.HigherNode, key, keyIndex))
-                {
-                    node.HigherNode = null;
-                    return node.CanBeRemoved;
-                }
-
-                if (node.HigherNode.CanBeSimplified)
-                {
-                    node.HigherNode = node.HigherNode.HigherNode ?? node.HigherNode.LowerNode;
-                }
-            }
-
-            if (keyIndex < key.Length - 1 && currentKeyCharacter == node.SplitCharacter && RemoveNode(node.EqualNode, key, keyIndex + 1))
-            {
-                node.EqualNode = null;
+                node.LowerNode = null;
                 return node.CanBeRemoved;
             }
 
-            if (keyIndex == key.Length - 1 && currentKeyCharacter == node.SplitCharacter)
+            if (node.LowerNode.CanBeSimplified)
             {
-                node.ClearValue();
+                node.LowerNode = node.LowerNode.LowerNode ?? node.LowerNode.HigherNode;
+            }
+        }
+
+        if (currentKeyCharacter > node.SplitCharacter && node.HigherNode != null)
+        {
+            if (RemoveNode(node.HigherNode, key, keyIndex))
+            {
+                node.HigherNode = null;
+                return node.CanBeRemoved;
             }
 
+            if (node.HigherNode.CanBeSimplified)
+            {
+                node.HigherNode = node.HigherNode.HigherNode ?? node.HigherNode.LowerNode;
+            }
+        }
+
+        if (keyIndex < key.Length - 1 && currentKeyCharacter == node.SplitCharacter && node.EqualNode != null && RemoveNode(node.EqualNode, key, keyIndex + 1))
+        {
+            node.EqualNode = null;
             return node.CanBeRemoved;
         }
+
+        if (keyIndex == key.Length - 1 && currentKeyCharacter == node.SplitCharacter)
+        {
+            node.ClearValue();
+        }
+
+        return node.CanBeRemoved;
     }
 }

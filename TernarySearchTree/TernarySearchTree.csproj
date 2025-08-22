@@ -18,6 +18,7 @@ http://www.cs.otago.ac.nz/cosc463/2005/ternary.pdf</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <AssemblyVersion>1.5.1.0</AssemblyVersion>
     <FileVersion>1.5.1.0</FileVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
 </Project>
