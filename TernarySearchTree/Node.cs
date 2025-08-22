@@ -4,12 +4,11 @@ internal class Node<TValue>
 {
     private TValue value;
 
-#pragma warning disable CS8618
     public Node(char splitCharacter)
     {
+        value = default!;
         SplitCharacter = splitCharacter;
     }
-#pragma warning restore CS8601
 
     public char SplitCharacter { get; private set; }
 
@@ -33,9 +32,7 @@ internal class Node<TValue>
 
     internal void ClearValue()
     {
-#pragma warning disable CS8601
-        value = default;
-#pragma warning restore CS8601
+        value = default!;
         HasValue = false;
     }
 

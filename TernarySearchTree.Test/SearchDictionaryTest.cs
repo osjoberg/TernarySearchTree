@@ -142,7 +142,7 @@ namespace TernarySearchTree.Test
         }
 
         [TestMethod]
-        public void NearSearch()
+        public void StartsWithEditDistance()
         {
             var dictionary = new SearchDictionary<string>
             {

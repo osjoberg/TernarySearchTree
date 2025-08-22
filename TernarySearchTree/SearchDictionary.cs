@@ -162,9 +162,7 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
         var node = Tree.GetNodeWithValue(root, key);
         if (node == null || node.HasValue == false)
         {
-#pragma warning disable CS8601
-            value = default;
-#pragma warning restore CS8601
+            value = default!;
             return false;
         }
 
@@ -208,92 +206,125 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
     /// <returns>List of values matching key, with their edit distance towards the search key.</returns>
     public IEnumerable<SearchMatch<TValue>> StartsWith(string startOfKey, int maxEditDistance)
     {
+        Argument.IsNotNullAndNotEmpty(startOfKey, nameof(startOfKey));
+        Argument.IsWithinRange(maxEditDistance >= 0, nameof(maxEditDistance));
+
         if (root == null)
         {
             yield break;
         }
 
-        Argument.IsNotNullAndNotEmpty(startOfKey, nameof(startOfKey));
+        var keyLength = startOfKey.Length;
+        var arrayLength = startOfKey.Length + 1;
+
+        // Pool of arrays so that arrays for the Levenshtein algorithm can be resued.
+        var arrayPool = new Stack<int[]>();
+        int[] RentArray() => arrayPool.TryPop(out var array) ? array : new int[arrayLength];
+        void ReturnArray(int[] array) => arrayPool.Push(array);
 
         // Initialize a Levenshtein table with no consumption (i.e.only 1 row).
-        var init = Enumerable.Range(0, startOfKey.Length + 1).ToArray();
+        var init = RentArray();
 
         var stack = new Stack<(Node<TValue> node, int[] row)>();
         stack.Push((root, init));
 
-        while (stack.Count > 0)
+        var valueStack = new Stack<Node<TValue>>();
+
+        while (stack.TryPop(out var state))
         {
-            var (node, previousRow) = stack.Pop();
+            var (node, previousRow) = state;
 
             // Traverse side branches without advancing along the path.
             // They are on a step earlier from us (consuming them will cost), so it is free to check them, result in reuse of levenshtein row.
             if (node.LowerNode != null)
             {
-                stack.Push((node.LowerNode, previousRow));
+                var copy = RentArray();
+                Array.Copy(previousRow, copy, arrayLength);
+                stack.Push((node.LowerNode, copy));
             }
 
             if (node.HigherNode != null)
             {
-                stack.Push((node.HigherNode, previousRow));
+                var copy = RentArray();
+                Array.Copy(previousRow, copy, arrayLength);
+                stack.Push((node.HigherNode, copy));
             }
 
             // Build next row for this node's split char.
-            var currentRow = new int[startOfKey.Length + 1];
+            var currentRow = RentArray();
 
             // The first column is increasing from the one above in the table (deletion).
             currentRow[0] = previousRow[0] + 1; 
 
-            var minInRow = currentRow[0];
+            var minCurrentRow = currentRow[0];
 
-            for (var i = 1; i <= startOfKey.Length; i++)
+            for (var keyIndex = 0; keyIndex < startOfKey.Length; keyIndex++)
             {
+                var arrayIndex = keyIndex + 1;
+
                 // Delete operations take the value above + 1.
-                var delete = previousRow[i] + 1;
+                var delete = previousRow[arrayIndex] + 1;
 
                 // Insert operations take the value to the left + 1.
-                var insert = currentRow[i - 1] + 1;
+                var insert = currentRow[keyIndex] + 1;
 
-                // Substitution is free (compared to upper left) if there is a match (substitute a for a), otherwise it costs 1 .
-                var substitute = previousRow[i - 1] + (startOfKey[i - 1] == node.SplitCharacter ? 0 : 1); 
-
-                currentRow[i] = Math.Min(Math.Min(delete, insert), substitute);
-                if (currentRow[i] < minInRow)
+                // Substitution is free (compared to upper left) if there is a match (substitute a for a), otherwise it costs 1.
+                var substitute = previousRow[keyIndex] + (startOfKey[keyIndex] == node.SplitCharacter ? 0 : 1); 
+                
+                currentRow[arrayIndex] = Math.Min(Math.Min(delete, insert), substitute);
+                if (currentRow[arrayIndex] < minCurrentRow)
                 {
-                    minInRow = currentRow[i];
+                    minCurrentRow = currentRow[arrayIndex];
                 }
             }
 
             // Dump the tree if the distance from the search term to the child is within the allowed distance.
             // Also dump the tree if the current node has consumed the entire key and the distance between them is within the allowed distance.
-            if (currentRow[^1] <= maxEditDistance && (currentRow[0] == startOfKey.Length || node.HasValue))
+            if (currentRow[keyLength] <= maxEditDistance && (currentRow[0] == startOfKey.Length || node.HasValue))
             {
                 if (node.HasValue)
                 {
-                    yield return new SearchMatch<TValue>(node.Value, currentRow[^1]);
+                    yield return new SearchMatch<TValue>(node.Value, currentRow[keyLength]);
                 }
 
                 if (node.EqualNode != null)
                 {
-                    foreach (var v in Tree.GetAllValues(node.EqualNode))
+                    valueStack.Push(node.EqualNode);
+
+                    while (valueStack.TryPop(out var valueNode))
                     {
-                        yield return new SearchMatch<TValue>(v, currentRow[^1]);
+                        if (valueNode.HasValue)
+                        {
+                            yield return new SearchMatch<TValue>(valueNode.Value, currentRow[keyLength]);
+                        }
+
+                        if (valueNode.LowerNode != null)
+                        {
+                            valueStack.Push(valueNode.LowerNode);
+                        }
+
+                        if (valueNode.EqualNode != null)
+                        {
+                            valueStack.Push(valueNode.EqualNode);
+                        }
+
+                        if (valueNode.HigherNode != null)
+                        {
+                            valueStack.Push(valueNode.HigherNode);
+                        }
                     }
                 }
-
-                continue;
             }
-
-            if (minInRow > maxEditDistance)
-            {
-                // There is no point in continuing down this branch, as it is too far away. (The distance can only increase, and our lowest is already over limit).
-                continue;
-            }
-
-            if (node.EqualNode != null)
+            else if (minCurrentRow <= maxEditDistance && node.EqualNode != null)
             {
                 // Move down the tree. By sending currentRow we are telling the tree that we are consuming it.
-                stack.Push((node.EqualNode, currentRow));
+                var copy = RentArray();
+                Array.Copy(currentRow, copy, arrayLength);
+                stack.Push((node.EqualNode, copy));
             }
+
+            ReturnArray(currentRow);
+            ReturnArray(previousRow);
         }
     }
 

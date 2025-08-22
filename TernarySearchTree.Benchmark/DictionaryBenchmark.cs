@@ -5,6 +5,7 @@ using BenchmarkDotNet.Attributes;
 
 namespace TernarySearchTree.Benchmark;
 
+[MemoryDiagnoser]
 public class DictionaryBenchmark
 {
     private static readonly string[] Keys = Keygenerator.GenerateKeys(42, 20, '0', 'z').Distinct().Take(10000).ToArray();
@@ -120,14 +121,13 @@ public class DictionaryBenchmark
     }
 
     [Benchmark]
-    public int SearchDictionary_NearSearch()
+    public int SearchDictionary_StartsWithEditDistance()
     {
         var sum = 0;
-        foreach (var key in KeysInRandomOrder.ToArray())
+        foreach (var key in KeysInRandomOrder)
         {
             sum += searchDictionary.StartsWith(key, 4).Select(v => v.Value).Sum();
         }
-
         return sum;
     }
 }
