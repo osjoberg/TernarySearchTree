@@ -204,7 +204,7 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
     /// <param name="startOfKey">Start of keys to match.</param>
     /// <param name="maxEditDistance">Maximum edit distance to match.</param>
     /// <returns>List of values matching key, with their edit distance towards the search key.</returns>
-    public IEnumerable<SearchMatch<TValue>> StartsWith(string startOfKey, int maxEditDistance)
+    public IEnumerable<SearchResult<TValue>> StartsWith(string startOfKey, int maxEditDistance)
     {
         Argument.IsNotNullAndNotEmpty(startOfKey, nameof(startOfKey));
         Argument.IsWithinRange(maxEditDistance >= 0, nameof(maxEditDistance));
@@ -284,7 +284,7 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
             {
                 if (node.HasValue)
                 {
-                    yield return new SearchMatch<TValue>(node.Value, currentRow[keyLength]);
+                    yield return new SearchResult<TValue>(node.Value, currentRow[keyLength]);
                 }
 
                 if (node.EqualNode != null)
@@ -295,7 +295,7 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
                     {
                         if (valueNode.HasValue)
                         {
-                            yield return new SearchMatch<TValue>(valueNode.Value, currentRow[keyLength]);
+                            yield return new SearchResult<TValue>(valueNode.Value, currentRow[keyLength]);
                         }
 
                         if (valueNode.LowerNode != null)
