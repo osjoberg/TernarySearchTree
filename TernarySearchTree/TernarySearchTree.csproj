@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Version>1.6.1.0</Version>
+    <Version>1.6.2.0</Version>
     <Authors>Oskar Sjöberg</Authors>
     <Company />
     <Product />
@@ -16,8 +16,8 @@ http://www.codeproject.com/KB/recipes/tst.aspx
 http://www.cs.otago.ac.nz/cosc463/2005/ternary.c
 http://www.cs.otago.ac.nz/cosc463/2005/ternary.pdf</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <AssemblyVersion>1.6.1.0</AssemblyVersion>
-    <FileVersion>1.6.1.0</FileVersion>
+    <AssemblyVersion>1.6.2.0</AssemblyVersion>
+    <FileVersion>1.6.2.0</FileVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 

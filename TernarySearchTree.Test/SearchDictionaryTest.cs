@@ -181,6 +181,18 @@ namespace TernarySearchTree.Test
         }
 
         [TestMethod]
+        public void StartsWithEditDistance2()
+        {
+            var resultsWithShortWords = new SearchDictionary<string>
+            {
+                { "4", "4" },
+                { "44", "44" }
+            }.StartsWith("sekrita", 4);
+
+            Assert.AreEqual(0, resultsWithShortWords.Count());
+        }
+
+        [TestMethod]
         public void SetThis()
         {
             var dictionary = new SearchDictionary<object>();

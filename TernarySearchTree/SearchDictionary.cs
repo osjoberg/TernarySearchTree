@@ -221,9 +221,13 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
         var arrayPool = new Stack<int[]>();
         int[] RentArray() => arrayPool.TryPop(out var array) ? array : new int[arrayLength];
         void ReturnArray(int[] array) => arrayPool.Push(array);
-
+        
         // Initialize a Levenshtein table with no consumption (i.e.only 1 row).
         var init = RentArray();
+        for (var index = 0; index < arrayLength; index++)
+        {
+            init[index] = index;
+        }
 
         var stack = new Stack<(Node<TValue> node, int[] row)>();
         stack.Push((root, init));
