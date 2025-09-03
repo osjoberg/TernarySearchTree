@@ -288,7 +288,7 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
             {
                 if (node.HasValue)
                 {
-                    yield return new SearchResult<TValue>(node.Value, currentRow[keyLength], previousKey + node.SplitCharacter);
+                    yield return new SearchResult<TValue>(previousKey + node.SplitCharacter, node.Value, currentRow[keyLength]);
                 }
 
                 if (node.EqualNode != null)
@@ -301,7 +301,7 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
                         var (valueNode, key) = valueTuple;
                         if (valueNode.HasValue)
                         {
-                            yield return new SearchResult<TValue>(valueNode.Value, currentRow[keyLength], key + valueNode.SplitCharacter);
+                            yield return new SearchResult<TValue>(key + valueNode.SplitCharacter, valueNode.Value, currentRow[keyLength]);
                         }
 
                         if (valueNode.LowerNode != null)

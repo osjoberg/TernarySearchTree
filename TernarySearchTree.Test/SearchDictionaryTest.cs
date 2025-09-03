@@ -162,14 +162,14 @@ namespace TernarySearchTree.Test
 
             CollectionAssert.AreEqual(new[]
             {
-                new SearchResult<string>("hörlurarochannat", 3, "hörlurarochannat"),
-                new SearchResult<string>("hörlurar", 3, "hörlurar"),
-                new SearchResult<string>("höglurar", 3, "höglurar"),
-                new SearchResult<string>("lurarna", 0, "lurarna"),
-                new SearchResult<string>("lurer", 1, "lurer"),
-                new SearchResult<string>("lurar", 0, "lurar"),
-                new SearchResult<string>("lurur", 1, "lurur"),
-                new SearchResult<string>("lugercheck", 2, "lugercheck"),
+                new SearchResult<string>("hörlurarochannat", "hörlurarochannat", 3),
+                new SearchResult<string>("hörlurar", "hörlurar", 3),
+                new SearchResult<string>("höglurar", "höglurar", 3),
+                new SearchResult<string>("lurarna", "lurarna", 0),
+                new SearchResult<string>("lurer", "lurer", 1),
+                new SearchResult<string>("lurar", "lurar", 0),
+                new SearchResult<string>("lurur", "lurur", 1),
+                new SearchResult<string>("lugercheck", "lugercheck", 2),
             }.OrderBy(v => v.Value).ToArray(), result);
             
             var resultWithDelete = new SearchDictionary<string>
@@ -177,7 +177,7 @@ namespace TernarySearchTree.Test
                 { "lurcheck", "lurcheck" },
                 { "luarcheck", "luarcheck" }
             }.StartsWith("lurarcheck", 1).OrderBy(v => v.Value).ToArray();
-            CollectionAssert.AreEqual(new[] { new SearchResult<string>("luarcheck", 1, "luarcheck") }.OrderBy(v => v.Value).ToArray(), resultWithDelete);
+            CollectionAssert.AreEqual(new[] { new SearchResult<string>("luarcheck", "luarcheck", 1) }.OrderBy(v => v.Value).ToArray(), resultWithDelete);
         }
 
         [TestMethod]

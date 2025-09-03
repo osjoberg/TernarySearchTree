@@ -1,6 +1,6 @@
 ﻿namespace TernarySearchTree;
 
-public struct SearchResult<TValue>(TValue value, int editDistance, string key)
+public readonly struct SearchResult<TValue>(string key, TValue value, int editDistance)
 {
     public TValue Value { get; } = value;
 
