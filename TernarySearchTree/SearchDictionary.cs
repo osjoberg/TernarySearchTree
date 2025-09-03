@@ -229,14 +229,14 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
             init[index] = index;
         }
 
-        var stack = new Stack<(Node<TValue> node, int[] row)>();
-        stack.Push((root, init));
+        var stack = new Stack<(Node<TValue> node, int[] row, string key)>();
+        stack.Push((root, init, ""));
 
-        var valueStack = new Stack<Node<TValue>>();
+        var valueStack = new Stack<(Node<TValue>, string key)>();
 
         while (stack.TryPop(out var state))
         {
-            var (node, previousRow) = state;
+            var (node, previousRow, previousKey) = state;
 
             // Traverse side branches without advancing along the path.
             // They are on a step earlier from us (consuming them will cost), so it is free to check them, result in reuse of levenshtein row.
@@ -244,14 +244,14 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
             {
                 var copy = RentArray();
                 Array.Copy(previousRow, copy, arrayLength);
-                stack.Push((node.LowerNode, copy));
+                stack.Push((node.LowerNode, copy, previousKey));
             }
 
             if (node.HigherNode != null)
             {
                 var copy = RentArray();
                 Array.Copy(previousRow, copy, arrayLength);
-                stack.Push((node.HigherNode, copy));
+                stack.Push((node.HigherNode, copy, previousKey));
             }
 
             // Build next row for this node's split char.
@@ -288,33 +288,35 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
             {
                 if (node.HasValue)
                 {
-                    yield return new SearchResult<TValue>(node.Value, currentRow[keyLength]);
+                    yield return new SearchResult<TValue>(node.Value, currentRow[keyLength], previousKey + node.SplitCharacter);
                 }
 
                 if (node.EqualNode != null)
                 {
-                    valueStack.Push(node.EqualNode);
+                    
+                    valueStack.Push((node.EqualNode, previousKey + node.SplitCharacter));
 
-                    while (valueStack.TryPop(out var valueNode))
+                    while (valueStack.TryPop(out var valueTuple))
                     {
+                        var (valueNode, key) = valueTuple;
                         if (valueNode.HasValue)
                         {
-                            yield return new SearchResult<TValue>(valueNode.Value, currentRow[keyLength]);
+                            yield return new SearchResult<TValue>(valueNode.Value, currentRow[keyLength], key + valueNode.SplitCharacter);
                         }
 
                         if (valueNode.LowerNode != null)
                         {
-                            valueStack.Push(valueNode.LowerNode);
+                            valueStack.Push((valueNode.LowerNode, key));
                         }
 
                         if (valueNode.EqualNode != null)
                         {
-                            valueStack.Push(valueNode.EqualNode);
+                            valueStack.Push((valueNode.EqualNode, key + valueNode.SplitCharacter));
                         }
 
                         if (valueNode.HigherNode != null)
                         {
-                            valueStack.Push(valueNode.HigherNode);
+                            valueStack.Push((valueNode.HigherNode, key));
                         }
                     }
                 }
@@ -324,7 +326,7 @@ public class SearchDictionary<TValue> : IDictionary<string, TValue>
                 // Move down the tree. By sending currentRow we are telling the tree that we are consuming it.
                 var copy = RentArray();
                 Array.Copy(currentRow, copy, arrayLength);
-                stack.Push((node.EqualNode, copy));
+                stack.Push((node.EqualNode, copy, previousKey + node.SplitCharacter));
             }
 
             ReturnArray(currentRow);
